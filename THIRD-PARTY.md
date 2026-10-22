@@ -13,7 +13,7 @@ own copies, checked by SHA-256 (README, "Reproducing the match").
 
 | File | From | Licence |
 | --- | --- | --- |
-| `src/d3dapp.cpp`, `src/d3dapp.h` | Microsoft's DirectX sample application framework, as Stuart Gillam's GPL release of the game's source includes it | as released by Stuart Gillam under GPL-3.0 |
+| `src/d3dapp.cpp`, `src/d3dapp.h` | Microsoft DirectX SDK sample application framework, (c) Microsoft Corporation; carried because Stuart Gillam's GPL release of the game's source includes it | not licensed by Microsoft under the GPL (`LICENSES/LicenseRef-Microsoft-DirectX-SDK-Sample.txt`); Stuart Gillam's and this project's changes GPL-3.0-only |
 | `src/oggvorbis.h` | declarations from the Xiph.Org libogg and libvorbis 1.0 headers | BSD-3-Clause (Xiph.Org Foundation; `LICENSES/BSD-3-Clause.txt`), with this project's GPL-3.0-only |
 | `src/OggFileRead.cpp` | its decode loop follows Xiph.Org's `decoder_example.c` (libvorbis 1.0), turned into a class | BSD-3-Clause (Xiph.Org Foundation), with this project's GPL-3.0-only |
 | `src/adpcm.c` | the IMA ADPCM step tables (Jack Jansen's public reference implementation) | public reference tables |

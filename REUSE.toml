@@ -16,14 +16,16 @@ SPDX-FileCopyrightText = ["Stuart Gillam (the game's source release, github.com/
                           "David Prentice and the onslaught-decomp contributors"]
 SPDX-License-Identifier = "GPL-3.0-only"
 
-# Microsoft's DirectX sample application framework, as Stuart Gillam's GPL release of the game's source includes it
-# (with Microsoft's notice in the file): here as released by Stuart Gillam under GPL-3.0 (THIRD-PARTY.md). The other
-# sample files the game linked, which his release does not include, are left out.
+# Microsoft's DirectX SDK sample application framework (with Microsoft's notice in the file), carried because Stuart
+# Gillam's GPL release of the game's source includes it. Microsoft has not licensed it under the GPL: its code keeps
+# Microsoft's own terms (LicenseRef-Microsoft-DirectX-SDK-Sample); Stuart Gillam's and this project's changes are
+# GPL-3.0-only (THIRD-PARTY.md). The other sample files the game linked, which his release does not include, are left out.
 [[annotations]]
 path = ["src/d3dapp.cpp", "src/d3dapp.h"]
-SPDX-FileCopyrightText = ["Microsoft Corporation (DirectX sample framework)",
-                          "Stuart Gillam (the game's source release, GPL-3.0)"]
-SPDX-License-Identifier = "GPL-3.0-only"
+SPDX-FileCopyrightText = ["Microsoft Corporation (DirectX SDK sample framework)",
+                          "Stuart Gillam (the game's source release, github.com/stuart73/Onslaught)",
+                          "David Prentice and the onslaught-decomp contributors"]
+SPDX-License-Identifier = "LicenseRef-Microsoft-DirectX-SDK-Sample AND GPL-3.0-only"
 
 # Xiph.Org's libogg and libvorbis 1.0: the header declarations, and the decode loop of decoder_example.c (THIRD-PARTY.md).
 [[annotations]]

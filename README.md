@@ -57,8 +57,8 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   headers or libraries, only the SHA-256 pins that say which ones the match needs.
 - Of Microsoft's DirectX sample code, it keeps exactly one part: `src/d3dapp.cpp` and `src/d3dapp.h`, the sample
   application framework as Stuart Gillam's GPL release of the game's source includes it (their header keeps
-  Microsoft's 1998-2000 notice). They are here as released by Stuart Gillam under GPL-3.0, as
-  [THIRD-PARTY.md](THIRD-PARTY.md) and [REUSE.toml](REUSE.toml) record. Every other sample file the game linked is
+  Microsoft's 1998-2000 notice). They are carried because his release includes them; Microsoft has not licensed them
+  under the GPL, as [THIRD-PARTY.md](THIRD-PARTY.md) and [REUSE.toml](REUSE.toml) record. Every other sample file the game linked is
   left out (below), and so is the SDK's own sample framework, whose headers the build reads from your copy of the SDK.
 
 ## What is left out

@@ -1,0 +1,9 @@
+LicenseRef-Microsoft-DirectX-SDK-Sample
+
+src/d3dapp.cpp and src/d3dapp.h are Microsoft's DirectX SDK sample application framework (D3DApp), with Microsoft
+Corporation's 1998-2000 notice kept in the files. They are in this repository because Stuart Gillam's GPL release of the
+game's source (github.com/stuart73/Onslaught) includes them, and the game's executable was built with them.
+
+Microsoft has not licensed this code under the GPL. Its terms are those under which Microsoft distributed the DirectX
+SDK samples; nothing in this repository grants any licence to Microsoft's code. The changes Stuart Gillam made and the
+decompilation's changes are GPL-3.0-only, like the rest of src/.

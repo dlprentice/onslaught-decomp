@@ -34,7 +34,7 @@ SPDX-License-Identifier = "GPL-3.0-only AND BSD-3-Clause"
 
 # Documentation and notes.
 [[annotations]]
-path = ["*.md", "notes/**", "docs/**", "tools/README.md"]
+path = ["*.md", "notes/**", "docs/**", "tools/README.md", "config/README.md"]
 precedence = "override"
 SPDX-FileCopyrightText = "David Prentice and the onslaught-decomp contributors"
 SPDX-License-Identifier = "CC-BY-SA-4.0"

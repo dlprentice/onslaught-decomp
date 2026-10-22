@@ -18,12 +18,15 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 
 ## Related projects
 
-- [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor): the Godot rebuild of the game,
-  the companion app for careers, saves and settings, and documentation of the game's formats and behaviour.
+- [onslaught-ce](https://github.com/dlprentice/onslaught-ce): Onslaught CE, the native Linux and Windows port built
+  from this decompilation; play the game here.
+- [onslaught-godot](https://github.com/dlprentice/onslaught-godot): the Godot rebuild of the game.
+- [onslaught-preservation](https://github.com/dlprentice/onslaught-preservation): documentation of the game's
+  formats, saves, mechanics, levels and engine.
+- [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor): the companion app for careers,
+  saves, settings and lore (to be renamed onslaught-companion).
 - [stuart73/Onslaught](https://github.com/stuart73/Onslaught): Stuart Gillam's GPL release of the game's source,
   which `src/` starts from.
-
-Further projects will be linked when they are published.
 
 ## What is here
 

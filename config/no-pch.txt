@@ -1,0 +1,19 @@
+# Sources built without the precompiled header (tools/decomp.py flags_for); every other source with the default flags
+# uses /Yu on its own include of common.h (spelled as it spells it, ..\common.h in MissionScript/). /Yu skips
+# everything before that include, so a source that defines a switch there keeps it only if common.h itself does not
+# test it; those that do stay off the PCH (a switch only later headers test can follow the include). FILE: reason
+AsmInstruction.cpp: opens with asminstruction.h, not common.h
+DataType.cpp: opens with DataType.h, not common.h
+EventFunction.cpp: opens with EventFunction.h, not common.h
+IScript.cpp: opens with ..\common.h, not common.h
+PCMusicStream.cpp: defines PCMUSICSTREAM_CPP before common.h, which MemoryManager.h tests
+PCPlatform.cpp: defines PCPLATFORM_CPP before common.h, which MemoryManager.h tests
+SoundManager.cpp: defines SOUNDMANAGER_CPP before common.h, which MemoryManager.h tests
+cframetimer.cpp: its own flags (config/file-flags.txt)
+collisionseekingthing.cpp: defines COLLISIONSEEKINGTHING_CPP before common.h, which MemoryManager.h tests
+engine.cpp: defines ENGINE_CPP before common.h, which MemoryManager.h tests
+mesh.cpp: includes MemoryManagerMesh.h (the Load typed-new pad, an authorized file-local header copy) before common.h
+adpcm.c: a C file (the precompiled header is C++)
+splinebasis.c: a C file (the precompiled header is C++)
+pausecommons.c: a C file (the precompiled header is C++)
+avirecorder.c: a C file (the precompiled header is C++)

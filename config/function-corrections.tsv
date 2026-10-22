@@ -1,0 +1,21 @@
+address	bytes	name	evidence
+0x004ac6e0	2122	CMeshCollisionVolume__CollideWithSphere	the table's first extent, 2020 bytes, end mid-instruction (004acec3); the function's early exits jump to 004acf1b (004ac704, 004ac711) and it ends with ret 0x10 at 004acf27
+0x004acde0	0	-	a block of 004ac6e0, not a function: no prologue, reads the parent's frame ([esp+0x40], ebx) and is reached only by je at 004acd22
+0x00512460	10	con_whatami	a function the table first lacked: mov ecx,LT; jmp PCLTShell::ShowGFXCardInfo (00513650), registered as cg_whatami's handler
+0x00529300	76	SortModesCallback	the qsort comparator BuildDeviceList pushes (00529350 region); starts after the previous function's padding and ends with ret at 0052934b (Stuart's d3dapp.cpp SortModesCallback)
+0x0052c750	38	D3DDeviceInfo__ctor	the constructor CD3DApplication::Init passes to the vector constructor iterator (00528f80 region); ends with ret at 0052c775
+0x004cce20	23	CPDTimelineEntry__ctor	the element constructor CParticleSet::Create passes to the vector constructor iterator for a timeline's ten entries (004cc498); ends with ret at 004cce36
+0x005412b0	18	BinkFree	the free callback CDXFrontEndVideo::Open passes to Bink next to BinkAlloc 00541280 (its only reference, in Open 005412e0); MEM_MANAGER.Free and ret 4 at 005412bf
+0x004540c0	238	RemapFixedKey	the key-capture callback: RenderBindingsAndPollRemapInput 00453ad0, RemapKey 004541e0 and 00456190 pass its address; a byte-indexed switch (tables 004541b0/004541c4, excluded) ending with ret at 004541ad
+0x00491160	19	CMapTex__ctor	the element constructor CEngine::Init (004499d0) passes by address; clears +0/+4/+8, sets the word at +0xc to -1, ret at 00491172 (maptex.obj starts here)
+0x004ebbb0	10	con_buildstaticshadows	the console command handler CStaticShadows::Initialise registers (004ebbc6 pushes it to CConsole::RegisterCommand 0042af80); loads the shadows object and jumps to 004ebe40
+0x004ee0c0	10	SShadowMap__ctor	the element constructor BuildShadowMaps (004ec2f0) and Load (004ee8f0) pass by address; clears +0x10, ret at 004ee0c9
+0x00523200	10	SMixerSlot__ctor	the element constructor CMixerMap::Init (005232b0) passes by address; clears +4, ret at 00523209
+0x004905d0	17	CompareLights	the qsort comparator CLightManager::Process pushes (004906cb, 00490715); after the switch table 004905b4..004905c8 and its padding, it ends with ret at 004905e0
+0x00542710	10	HUD__exit	the atexit thunk for HUD: mov ecx,HUD; jmp 00542720 (the table merged it with the destructor that follows)
+0x00542720	22	CDXHud__dtor	CDXHud's implicit destructor: the eh vector destructor iterator on CHud's two active readers at +0x9c, ret at 00542735
+0x00556b80	31	TEXTURE_ZERO__init	DXSurf.obj's ZERO_FVECTOR initializer after Render's padding (.CRT$XCU entry 00622ad4); three stores to 009cc048..009cc050 and ret at 00556b9e
+0x00456060	20	RecordFixedKey	a function the table first lacked: ControlsUI::RenderBindingsList pushes it as ForEachFixedKey's callback (0045518a); two argument stores to 0067787c/00677878 and ret at 00456073
+0x00513040	219	PCLTShell__EnumAxesCallback	the DirectInput axis callback InitDirectInput pushes at 0051324a before EnumObjects at 00513250; ret 8 at 00513118 ends the body, followed by five NOPs; the complete 224-byte compiled section and relocations match
+0x00527950	16	CReconnectInterface__ctor	the constructor the RECONNECT_INTERFACE initializer pushes at 00527905 for two 12-byte elements at 0089be50, before the vector constructor iterator at 00527913; ret at 0052795f; the complete 16-byte compiled section and relocations match
+0x00544710	88	CLandscapeView__ctor	the constructor BuildLevelSpecifics pushes at 005450f9 and 00545174 for 52-byte landscape-view elements, before vector constructor calls at 0054510c and 00545182; ret at 00544767 then eight NOPs; complete 96-byte compiled section and relocations match

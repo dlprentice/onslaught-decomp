@@ -1,0 +1,2 @@
+# Optional: tools/equiv.py (the emulator falsifier) needs Unicorn. The other tools use only the Python standard library.
+unicorn>=2.0

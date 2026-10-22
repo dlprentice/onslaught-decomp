@@ -1,0 +1,3 @@
+# Third-party sources tools/link.py compiles with the pinned compiler and links: <digest> <root> <path> [compiler options].
+# Roots as in link-inputs.sha256; a header is only checked. None at present: NvTriStrip, the one third-party component,
+# links as NVIDIA's prebuilt library (config/link-inputs.sha256, link-library-order.txt) instead of compiled source.

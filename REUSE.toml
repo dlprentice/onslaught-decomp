@@ -1,0 +1,49 @@
+# The licence of every path in this repository (https://reuse.software, REUSE.toml version 1). A file's own SPDX header
+# takes precedence over these entries; where several entries match a file, the last one applies. src/ carries no
+# per-file headers because its line numbers are part of the game's build (__LINE__); this file covers it.
+version = 1
+
+# Code, configuration and repository files.
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "David Prentice and the onslaught-decomp contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
+# The decompiled source: Stuart Gillam's GPL release of the game's source, completed by the decompilation.
+[[annotations]]
+path = ["src/**", "linklib/**"]
+SPDX-FileCopyrightText = ["Stuart Gillam (the game's source release, github.com/stuart73/Onslaught)",
+                          "David Prentice and the onslaught-decomp contributors"]
+SPDX-License-Identifier = "GPL-3.0-only"
+
+# Microsoft's DirectX sample application framework, as Stuart Gillam's GPL release of the game's source includes it
+# (with Microsoft's notice in the file): here as released by Stuart Gillam under GPL-3.0 (THIRD-PARTY.md). The other
+# sample files the game linked, which his release does not include, are left out.
+[[annotations]]
+path = ["src/d3dapp.cpp", "src/d3dapp.h"]
+SPDX-FileCopyrightText = ["Microsoft Corporation (DirectX sample framework)",
+                          "Stuart Gillam (the game's source release, GPL-3.0)"]
+SPDX-License-Identifier = "GPL-3.0-only"
+
+# Xiph.Org's libogg and libvorbis 1.0: the header declarations, and the decode loop of decoder_example.c (THIRD-PARTY.md).
+[[annotations]]
+path = ["src/oggvorbis.h", "src/OggFileRead.cpp"]
+SPDX-FileCopyrightText = ["Xiph.Org Foundation (libogg and libvorbis 1.0)",
+                          "David Prentice and the onslaught-decomp contributors"]
+SPDX-License-Identifier = "GPL-3.0-only AND BSD-3-Clause"
+
+# Documentation and notes.
+[[annotations]]
+path = ["*.md", "notes/**", "docs/**", "tools/README.md"]
+precedence = "override"
+SPDX-FileCopyrightText = "David Prentice and the onslaught-decomp contributors"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Notes that quote and document Stuart Gillam's published source (GPL version 3 only): the quoted source stays under
+# its GPL-3.0-only licence and credit, alongside CC BY-SA 4.0 for this project's text.
+[[annotations]]
+path = "notes/divergences.md"
+precedence = "override"
+SPDX-FileCopyrightText = ["David Prentice and the onslaught-decomp contributors",
+                          "Stuart Gillam (Onslaught source release, github.com/stuart73/Onslaught)"]
+SPDX-License-Identifier = "CC-BY-SA-4.0 AND GPL-3.0-only"

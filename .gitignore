@@ -1,0 +1,8 @@
+# Build output and the files the tools write from your own copy of the game stay out of the repository.
+/build/
+/local-data/
+/src/data/
+__pycache__/
+*.pyc
+# an optional local file of default input locations (README, Settings)
+/tools/site_paths.py

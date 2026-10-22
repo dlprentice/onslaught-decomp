@@ -1,0 +1,27 @@
+# The link's library inputs, in command-line order, each pinned by SHA-256: <digest> <root> <path>. Roots: vc6 is the
+# pinned Visual C++ 6 toolchain, lab is the inputs folder BEA_LAB (untracked; never commit the files). The static libraries
+# come first, then the import libraries in retail's import-descriptor order (KERNEL32 ... DINPUT8). tools/link.py
+# refuses to link if any file differs. The resource file (retail's .rsrc rebuilt as a .res) is linked like a library.
+28b9f04962378ec4668072f37d7fd2835cd6cacc17b40cf22002c57bd8e76714 lab third-party/msvc6-sp5-crt/LIBCMT.LIB
+08cd1b3ba2eab087c2d2acabf7a6919362aff59ed87141f167cbe12bee6a732c lab third-party/msvc6-crt/LIBCPMT.LIB
+348a220e94f90bd9f530514ae59ff9b044b76e2056f52b45df406c12d2156afb lab third-party/msvc6-crt/OLDNAMES.LIB
+a22ca24c92fd61912f7601f00a049f98a439763370726c724ce617020fa6526d lab third-party/directx9-sdk-d3dx9lib/d3dx9.lib
+07f40f6799edceffb1d9532a5a42d1e8177bbf5a60f5e1b0c9975b9c2cfcb1b5 lab third-party/directx9-sdk-d3dx9lib/DxErr9.lib
+3500a371e8da50973d9c56cc4d8fdaf296458f128a293e8348590765addcc7ed lab third-party/directx9-sdk-importlibs/dxguid.lib
+b0930513b380bbc3e77401db127c14bc7c10ff0992414471c8497da5aa48a0a4 lab third-party/nvtristrip-prebuilt-20261015/NvTriStrip-ut2003-engine.lib
+cd4a546f71481319aeee455aa0fb51698a094f9d3e6d8339acf445489a263c68 vc6 VC98/Lib/KERNEL32.LIB
+0a3c34c4daec09c1b9fd163d5d0b2ee9a6cbe0b3e863ae81a1fae3b9f936fd19 vc6 VC98/Lib/USER32.LIB
+dc99cf3da3e3e6b2efeee7724a6cb400a615f8e2dde9ebf6df6b3bf3eb3d7c1b vc6 VC98/Lib/GDI32.LIB
+1d82261a358979f818e7c799be43d57b48a001dfd3da457f2e04d7c9f680ec00 vc6 VC98/Lib/COMDLG32.LIB
+88e77c6590be2a9139c0015c1f07965d7c261cc552de4209d6e8e8d86c4c11c4 vc6 VC98/Lib/ADVAPI32.LIB
+bb098679a802afdbc6fdaac03dfe1ea81453a36f6d4768b1c1cd092b1dbe9342 vc6 VC98/Lib/WINMM.LIB
+3149b985832bd620623630ac45a7dee69aa9fb61cba3a2991f438c360d2da449 lab third-party/directx9-sdk-importlibs/dsound.lib
+0c2c6ebfeded71da862f8b8d772590ae0dc55d826b9871b0a1052ea333ff2c24 vc6 VC98/Lib/VFW32.LIB
+00f4901d01a75e9af1515169ee79d1ba416262f176649c4047451c8902c9e3d9 lab retail-importlibs/binkw32-stub/binkw32.lib
+ab3c04bb6da6d644b0e484a5e471eedf17498e21b9c505cdb0825e3e2e61df2c lab retail-importlibs/zlib.lib
+13b84536dec9f9752a904c8371bdb4d4bfe18a2461ef579205fd7e4a7c150036 lab retail-importlibs/ogg.lib
+0ae014cea7dc47c6adf2db6edab8a061859218c4231df08fcf65b1a98b53e57d lab retail-importlibs/vorbis.lib
+2a9530e6034db7e803a607da7d83d8d9325a369b9abd27846cb5d3af01786e95 vc6 VC98/Lib/VERSION.LIB
+9ef55b6800b785c0a1df26ef4e7a10fe2b71cda1e5632bb002e2ba24f2c0d62a lab third-party/directx9-sdk-importlibs/d3d9.lib
+1aefd62d9df8a26aa312817bd98b2fc3340477b238c918fc9edc04f7498a5b34 lab third-party/directx9-sdk-importlibs/dinput8.lib
+3a6537cb7f4b40020a7699913f7b5ea30a518ef2efd0ef1ebeb8e52445182a9c lab retail-resources-20261015/retail_rsrc.res

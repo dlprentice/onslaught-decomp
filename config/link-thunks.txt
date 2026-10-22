@@ -1,0 +1,41 @@
+# LINK CONCESSION: retail's 32 import thunks (six-byte `jmp [IAT]` stubs), in retail's order, as one object linked
+# before the first library member. Retail has them as one run at 0055d5e0..0055d69a, directly before its first LIBCMT
+# member (0055d6a0), because it loaded those import-library members before the CRT members. Our CRT members are
+# command-line objects and LINK loads library members only after every object, so the import libraries' own thunk
+# members would land at the end of .text. tools/link.py generates a COFF object (link_thunks) defining each thunk symbol
+# as `jmp [__imp_SYMBOL]`; the import libraries then supply only the __imp_ data and their thunks are discarded.
+# Columns (TAB): thunk symbol, DLL, retail import name (or #ordinal); tools/link_tests.py checks them against the
+# specimen's FF25 run when the specimen is present. Two further thunks stay with the libraries: Direct3DCreate9 and
+# DirectInput8Create (retail has them next to the dinput8 tables) and _RtlUnwind (pulled by trnsctrl/exsup).
+_DirectSoundCreate8@12	DSOUND.dll	#11
+_DirectSoundEnumerateA@8	DSOUND.dll	#2
+_AVIStreamWrite@32	AVIFIL32.dll	AVIStreamWrite
+_uncompress	zlib.dll	#63
+_compress	zlib.dll	#9
+_ogg_sync_wrote	ogg.dll	ogg_sync_wrote
+_ogg_sync_buffer	ogg.dll	ogg_sync_buffer
+_ogg_stream_packetout	ogg.dll	ogg_stream_packetout
+_ogg_stream_pagein	ogg.dll	ogg_stream_pagein
+_ogg_stream_init	ogg.dll	ogg_stream_init
+_ogg_page_serialno	ogg.dll	ogg_page_serialno
+_ogg_sync_pageout	ogg.dll	ogg_sync_pageout
+_ogg_stream_clear	ogg.dll	ogg_stream_clear
+_ogg_sync_clear	ogg.dll	ogg_sync_clear
+_ogg_page_eos	ogg.dll	ogg_page_eos
+_ogg_sync_init	ogg.dll	ogg_sync_init
+_vorbis_block_init	vorbis.dll	vorbis_block_init
+_vorbis_synthesis_init	vorbis.dll	vorbis_synthesis_init
+_vorbis_synthesis_headerin	vorbis.dll	vorbis_synthesis_headerin
+_vorbis_comment_init	vorbis.dll	vorbis_comment_init
+_vorbis_info_init	vorbis.dll	vorbis_info_init
+_vorbis_info_clear	vorbis.dll	vorbis_info_clear
+_vorbis_comment_clear	vorbis.dll	vorbis_comment_clear
+_vorbis_dsp_clear	vorbis.dll	vorbis_dsp_clear
+_vorbis_block_clear	vorbis.dll	vorbis_block_clear
+_vorbis_synthesis_read	vorbis.dll	vorbis_synthesis_read
+_vorbis_synthesis_pcmout	vorbis.dll	vorbis_synthesis_pcmout
+_vorbis_synthesis_blockin	vorbis.dll	vorbis_synthesis_blockin
+_vorbis_synthesis	vorbis.dll	vorbis_synthesis
+_VerQueryValueA@16	VERSION.dll	VerQueryValueA
+_GetFileVersionInfoA@16	VERSION.dll	GetFileVersionInfoA
+_GetFileVersionInfoSizeA@8	VERSION.dll	GetFileVersionInfoSizeA

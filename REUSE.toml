@@ -16,13 +16,14 @@ SPDX-FileCopyrightText = ["Stuart Gillam (the game's source release, github.com/
                           "David Prentice and the onslaught-decomp contributors"]
 SPDX-License-Identifier = "GPL-3.0-only"
 
-# Microsoft's DirectX SDK sample application framework (with Microsoft's notice in the file), carried because Stuart
-# Gillam's GPL release of the game's source includes it. Microsoft has not licensed it under the GPL: its code keeps
-# Microsoft's own terms (LicenseRef-Microsoft-DirectX-SDK-Sample); Stuart Gillam's and this project's changes are
-# GPL-3.0-only (THIRD-PARTY.md). The other sample files the game linked, which his release does not include, are left out.
+# src/d3dapp.cpp and src/d3dapp.h are Microsoft's DirectX SDK sample application framework, (c) Microsoft Corporation,
+# carried because Stuart Gillam's GPL release of the game's source includes them; Microsoft has not licensed them under
+# the GPL. Their code keeps Microsoft's own terms (LicenseRef-Microsoft-DirectX-SDK-Sample); Stuart Gillam's and this
+# project's changes are GPL-3.0-only (THIRD-PARTY.md). The other sample files the game linked, which his release does
+# not include, are left out.
 [[annotations]]
 path = ["src/d3dapp.cpp", "src/d3dapp.h"]
-SPDX-FileCopyrightText = ["Microsoft Corporation (DirectX SDK sample framework)",
+SPDX-FileCopyrightText = ["Microsoft Corporation (DirectX SDK sample application framework)",
                           "Stuart Gillam (the game's source release, github.com/stuart73/Onslaught)",
                           "David Prentice and the onslaught-decomp contributors"]
 SPDX-License-Identifier = "LicenseRef-Microsoft-DirectX-SDK-Sample AND GPL-3.0-only"

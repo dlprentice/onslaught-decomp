@@ -1,7 +1,7 @@
 # Findings that shape the source
 
 Status: reference, exported from the working repository's notes
-Last updated: 2026-10-22
+Last updated: 2026-10-29
 Summary: What the compiler, linker and retail evidence showed about the source's form, by finding.
 
 **A dropped CCutscene::Save reconstructed from literal order, October 15.** Each function emits the string

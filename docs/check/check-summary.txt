@@ -1,0 +1,15 @@
+Check summary
+
+Derived, by the export that published this tree, from the full log of `python3 tools/decomp.py score` run from this
+tree's export. The full log is not published; docs/check/README.md gives its SHA-256. Only the score line is copied
+from it verbatim.
+
+Score: {"gameFunctions": 5482, "gameBytes": 1367287, "funclets": 1185, "funcletBytes": 19169, "matchedFunctions": 5449, "matchedBytes": 1359136, "attempted": 5449, "importThunks": 32, "buildConcessions": 1}
+Function symbols: 5639 (by kind: match 5639)
+Virtual tables: 888 (by result: match 888)
+Build concessions: 1 (the bytes they change are not published)
+  mesh.cpp: build concession ?InitFromMem@CMesh@@QAEHAAVCDXMemBuffer@@H@Z+0x3236
+Compiler warnings: 52 (their lines name build paths and are not published)
+Compiler errors: 0
+Other log lines: 0 (not listed)
+Exit status: 0

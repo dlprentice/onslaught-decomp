@@ -1,7 +1,7 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-10-22
+Last updated: 2026-10-29
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
@@ -38,7 +38,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | `tools/` | the matching check, the linker and link comparison, the whole-executable inventory and data tools ([tools/README.md](tools/README.md)) |
 | `notes/` | the matching knowledge: the toolchain, compiler behaviour, techniques, divergences from Stuart's source and the link ([notes/README.md](notes/README.md)) |
 | `docs/SCORE.md` | the score, the matched functions and the functions this tree leaves out, rewritten by `tools/decomp.py score` |
-| `docs/check/` | the check this tree's score comes from: its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |
+| `docs/check/` | the check this tree's score comes from: a summary of its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |
 | `THIRD-PARTY.md` | the third-party material in `src/`, and what is left out |
 
 ## What it is, and what it is not
@@ -55,11 +55,12 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   (`src/PCText.cpp`, the credits and front-end text) are in the source because the match needs them.
 - It contains no part of the toolchain: no Visual C++ binaries, headers or libraries and no DirectX SDK binaries,
   headers or libraries, only the SHA-256 pins that say which ones the match needs.
-- Of Microsoft's DirectX sample code, it keeps exactly one part: `src/d3dapp.cpp` and `src/d3dapp.h`, the sample
-  application framework as Stuart Gillam's GPL release of the game's source includes it (their header keeps
-  Microsoft's 1998-2000 notice). They are carried because his release includes them; Microsoft has not licensed them
-  under the GPL, as [THIRD-PARTY.md](THIRD-PARTY.md) and [REUSE.toml](REUSE.toml) record. Every other sample file the game linked is
-  left out (below), and so is the SDK's own sample framework, whose headers the build reads from your copy of the SDK.
+- Of Microsoft's DirectX sample code, it keeps exactly one part. `src/d3dapp.cpp` and `src/d3dapp.h` are Microsoft's
+  DirectX SDK sample application framework, (c) Microsoft Corporation, carried because Stuart Gillam's GPL release of
+  the game's source includes them; Microsoft has not licensed them under the GPL. Their header keeps Microsoft's
+  1998-2000 notice, and [THIRD-PARTY.md](THIRD-PARTY.md) and [REUSE.toml](REUSE.toml) record their terms. Every other
+  sample file the game linked is left out (below), and so is the SDK's own sample framework, whose headers the build
+  reads from your copy of the SDK.
 
 ## What is left out
 

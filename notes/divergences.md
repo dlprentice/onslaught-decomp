@@ -1,7 +1,7 @@
 # Divergences from Stuart's source
 
 Status: reference, exported from the working repository's notes
-Last updated: 2026-10-22
+Last updated: 2026-10-29
 Summary: Where the retail build differs from Stuart Gillam's published source, by file and address.
 
 Each entry names the retail evidence that forced it.

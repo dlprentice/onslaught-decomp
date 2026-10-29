@@ -1,7 +1,7 @@
 # Matching techniques
 
 Status: reference, exported from the working repository's notes
-Last updated: 2026-10-22
+Last updated: 2026-10-29
 Summary: The working rules for reaching a byte match, each with the function that proved it.
 
 - **Index of the October 2 rules** (each has its entry under "Near-misses, since matched" with the

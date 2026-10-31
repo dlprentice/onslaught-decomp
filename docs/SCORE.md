@@ -1,7 +1,7 @@
 # Score
 
 Status: generated: `python3 tools/decomp.py score` rewrites the block between the markers
-Last updated: 2026-10-29
+Last updated: 2026-10-31
 Summary: how many of the retail game's functions this tree matches byte for byte, which, and which it leaves out.
 
 The score counts unique retail function addresses and their recorded extents, not C++ symbols: linker-folded aliases

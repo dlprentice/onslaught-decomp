@@ -1,8 +1,10 @@
 # Findings that shape the source
 
 Status: reference, exported from the working repository's notes
-Last updated: 2026-10-29
+Last updated: 2026-10-31
 Summary: What the compiler, linker and retail evidence showed about the source's form, by finding.
+
+Scores quoted in the entries below (5,470 of 5,482, say) are the scores as of each entry; the current score is the one in the README's Score section.
 
 **A dropped CCutscene::Save reconstructed from literal order, October 15.** Each function emits the string
 literals it references first (reverse reference order, functions in source order), and retail's Cutscene literals

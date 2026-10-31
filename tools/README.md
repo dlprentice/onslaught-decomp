@@ -6,7 +6,8 @@ Summary: what each tool in this folder is for, what it reads and writes, and its
 
 Every tool reads its inputs from the environment variables in the top-level README ("Reproducing the match") and
 writes only under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, the Wine prefix, and the
-system's temporary folder (`BEA_TMP` for `icfsim.py`). `equiv.py` also reads `BEA_MAIN` and `BEA_NAME_TABLE` (see the
+system's temporary folder (`BEA_TMP` for `icfsim.py`), except that the score command also rewrites the tracked report
+`docs/SCORE.md`. `equiv.py` also reads `BEA_MAIN` and `BEA_NAME_TABLE` (see the
 top-level README). Each script's docstring
 gives its full usage; each `*_tests.py` is its unit tests (`python3 -m unittest tools.decomp_tests`, for example).
 

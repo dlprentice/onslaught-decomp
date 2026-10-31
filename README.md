@@ -1,17 +1,18 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-10-29
+Last updated: 2026-10-31
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
 A byte-matching decompilation of *Battle Engine Aquila* (Lost Toys, 2003) against the retail PC executable:
 `BEA.exe`, SHA-256 `74154bfae14ddc8ecb87a0766f5bc381c7b7f1ab334ed7a753040eda1e1e7750`. The C++ in `src/` starts
 from Stuart Gillam's GPL release of the game's source ([stuart73/Onslaught](https://github.com/stuart73/Onslaught))
-and is completed, function by function, until Microsoft Visual C++ 6.0 SP5 compiles each game function to exactly the
-bytes the retail executable holds at its address.
+and has been reconstructed, function by function. The check compares objects compiled by Microsoft Visual C++ 6.0 SP5 against the
+retail executable, with the documented object correction and exclusions described below.
 
-**From this tree, the check matches 5,449 of the retail game's 5,482 functions** (1,359,136 of 1,367,287 bytes), and
+**From this tree, with the documented object correction, the check matches
+5,449 of the retail game's 5,482 functions** (1,359,136 of 1,367,287 bytes), and
 every function this tree annotates matches. The other 33 are defined in four files of Microsoft's DirectX SDK sample
 code that this tree leaves out (see "What is left out"); [docs/SCORE.md](docs/SCORE.md) lists them under "Not in this
 tree". The record of the check that measured this is in [docs/check/](docs/check/).
@@ -78,7 +79,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   library retail linked and import libraries made from the game's DLLs (`config/link-inputs.sha256` pins them all).
   Reproducing the linked executable is therefore not yet possible from this tree and public inputs alone; the
   function match is.
-- Per-function notes (what each retail function does, its callers and data) are not in this first release. They will
+- Per-function notes (what each retail function does, its callers and data) are not published; they will
   follow once they have been rewritten and reviewed one by one.
 
 ## Reproducing the match
@@ -152,7 +153,8 @@ python3 tools/decomp.py score                     # full check; rewrites docs/SC
 
 Every input is checked against its pin before anything compiles; a changed or missing file stops the tools with the
 file's name. The tools write only under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, in
-the Wine prefix (including the links above) and in the temporary folder.
+the Wine prefix (including the links above) and in the temporary folder, except that the score command also
+rewrites the tracked report `docs/SCORE.md`.
 
 ## Contributing
 

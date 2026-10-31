@@ -16,5 +16,6 @@ The tools run on your machine only and send nothing anywhere. They read your own
 toolchain from the locations you give them (read only: each file is checked against its SHA-256 pin first), run the
 compiler and linker under Wine in the prefix you name, and write only under this checkout's ignored `build/`,
 `src/data/` and `local-data/` folders, in that prefix (including the links it makes on the prefix's drive C to your
-copies of the compiler and SDK), and in the system's temporary folder (or `BEA_TMP`). Problems that matter most here: a tool writing outside those places, or modifying an input
-it was only meant to read.
+copies of the compiler and SDK), and in the system's temporary folder (or `BEA_TMP`), except that the score command
+also rewrites the tracked report `docs/SCORE.md`. Problems that matter most here: a tool writing outside those places
+or that report, or modifying an input it was only meant to read.

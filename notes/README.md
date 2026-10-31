@@ -1,7 +1,7 @@
 # Notes
 
 Status: active index
-Last updated: 2026-10-22
+Last updated: 2026-10-31
 Summary: the matching knowledge behind the decompilation, by area.
 
 The source's own comments hold the per-function knowledge that shaped it (the `STAND-IN`, `RECONSTRUCTED` and
@@ -19,6 +19,6 @@ finding states what was measured and on which function.
 - [divergences.md](divergences.md): where the retail build differs from Stuart Gillam's published source.
 - [link-reconstruction.md](link-reconstruction.md): how the link is rebuilt, what is proven, conceded and open.
 
-Per-function notes (what each retail function does, its callers and data) are not part of this first release. They
+Per-function notes (what each retail function does, its callers and data) are not published. They
 will follow after a curated review: each is rewritten from the maintainers' working notes and reviewed on its own
 before it is published.

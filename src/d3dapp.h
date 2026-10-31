@@ -4,7 +4,7 @@
 // 150 modes from +0x140, the current mode at +0xf50, the multisample type at +0xf58), a mode 24 bytes
 // (CCareer::WriteOptions 00420b10, CD3DApplication::GetAdapterInfo 00420cd0). The application object LT is at
 // 00855bb0: its adapters from +0x04, the adapter count +0x32e3c and the current adapter +0x32e40. d3dapp.cpp
-// (00528dd0..0052c7dd) fills in the rest: Stuart's members keep his order at their Direct3D 9 sizes.
+// (00528dd0..0052c7dd) fills in the rest: Stuart's members keep his order at their Direct3D 9 sizes. Copyright (c) 1998-2000 Microsoft Corporation. All rights reserved.
 
 #ifndef D3DAPP_H
 #define D3DAPP_H

@@ -1,7 +1,7 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-10-31
+Last updated: 2026-11-02
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
@@ -83,6 +83,10 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   follow once they have been rewritten and reviewed one by one.
 
 ## Reproducing the match
+
+The documented function-check route works from this public tree with your own pinned inputs. It does not require
+access to a maintainer's computer, restricted repositories or analysis database. This is separate from the full executable
+link, whose unavailable inputs are described above.
 
 You need, all from your own copies:
 

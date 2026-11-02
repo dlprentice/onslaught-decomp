@@ -1,17 +1,22 @@
 # Contributing
 
 Status: active
-Last updated: 2026-10-22
+Last updated: 2026-11-02
 Summary: how changes reach this repository, the rules for `src/`, and the licence of contributions.
 
 Thank you for your interest. Please read this before opening an issue or a pull request.
 
 ## How changes are made
 
-This repository is generated from the maintainers' working source by an export: it is not edited directly, and its
-history is a series of exports. Open an issue describing the problem or change, or a pull request with your change;
-the maintainers bring accepted work into the working source, check it there with the full byte comparison, and it
-appears here with the next export, credited to you.
+Fork this public repository, clone your fork, create a branch and commit your focused proposal there. Open an issue
+or a pull request against this repository's `main`. No collaborator invitation, maintainer-only repository access
+or analysis database is needed. The upstream branch is generated: maintainers import accepted changes into
+the working source, validate them and regenerate this tree with credit.
+
+Read `AGENTS.md`, [Reproducing the match](README.md#reproducing-the-match), licence notices and the relevant tool guide.
+Record your upstream commit and existing edits, and preserve unrelated work. Public function checks require your own
+appropriately licensed game, compiler and SDK inputs; full executable reconstruction has additional unavailable inputs.
+For documentation changes, check links and `git diff --check`; do not run a score just for prose. Do not add hosted CI.
 
 ## Rules for `src/`
 
@@ -21,7 +26,9 @@ appears here with the next export, credited to you.
 - **Every function carries its retail address**: a `// FUNCTION: 0xADDRESS` annotation on the line before the
   definition, or trailing on the definition line.
 - **A match is judged by `python3 tools/decomp.py check`**, never by eye: run it on the files you changed before and
-  after, and say in the pull request which functions changed status.
+  after, and say in the pull request which functions changed status. Include the public base commit, changed files,
+  sanitized before/after summaries and unavailable checks. Maintainers run the remaining acceptance gate before
+  integration. Raw compiler logs and disassembly can contain personal paths or original material; do not attach them.
 - **Concessions are labelled.** Where the source takes a form the original authors would not have written in order to
   reproduce the compiler's output (a stand-in, an ordering forced by the compiler's allocator), mark it with a
   `STAND-IN`, `RECONSTRUCTED` or `CONCESSION` comment that says why and what proved it.
@@ -37,6 +44,7 @@ you have the right to license it so.
 ## Never include game or toolchain files
 
 Never attach or commit any of the game's files or anything derived from them (executables, data, text dumps, saves,
-captures, byte listings beyond a short signature), any part of the Visual C++ 6 toolchain or the DirectX SDK (their
-binaries, headers, libraries or sample code), or the output of a decompiler. You supply those from your own copies;
-this repository contains none of them and will not accept them.
+captures, byte listings beyond a short signature), Visual C++ 6 toolchain files, additional DirectX SDK binaries,
+headers, libraries or sample code, or decompiler output. The existing `d3dapp.cpp`/`.h` sample-framework exception has
+its own notice in [THIRD-PARTY.md](THIRD-PARTY.md) and `REUSE.toml`; it does not permit adding other SDK files.
+Supply required external inputs from your own appropriately licensed copies.

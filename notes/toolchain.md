@@ -1,7 +1,7 @@
 # Toolchain and flags
 
 Status: reference, exported from the working repository's notes
-Last updated: 2026-10-31
+Last updated: 2026-11-02
 Summary: The compiler, flags and inputs the retail build used, and how each was established.
 
 - Compiler: Visual C++ 6.0 SP5 Professional, the retail build exactly: CL 12.00.8804 driving C1 12.00.8867,

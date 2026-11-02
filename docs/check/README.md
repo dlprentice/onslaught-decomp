@@ -1,13 +1,16 @@
 # The check behind the score
 
-Status: generated with each export
-Last updated: 2026-10-31
+Status: retained comparison evidence with a documentation-only export
+Last updated: 2026-11-02
 Summary: the check this tree's score comes from: how it was run, a summary of its log (the full log is not published; its SHA-256 is given here), and its table of matched symbols.
 
-Before each export is published, the maintainers run `python3 tools/decomp.py score` from the exported tree itself,
-with the inputs the README lists (each checked against its pin) and the compiler at the README's fixed paths
-("The compiler's paths"). What that run printed is kept here as a summary; its table of matched symbols and the score page
-it wrote are kept as they were:
+Code-changing exports require `python3 tools/decomp.py score` from the exported tree itself, with the README's pinned
+inputs and fixed compiler paths. A documentation-only export may retain a previous result only after all compared
+source, configuration, tools and input pins are checked unchanged. Its publication does not imply a new score run.
+
+This documentation-only update retains the comparison evidence published at public commit
+`9169f28862ebda0b768cbcc7ec354734af013f5e`. The score, matched table and check summary are unchanged; no new score was
+run for these prose changes. The retained records are:
 
 - [check-summary.txt](check-summary.txt): the log reduced to what can be published: the score line, how many function
   symbols matched (the log has one line per annotated function symbol: `match` or the kind of difference, its address,

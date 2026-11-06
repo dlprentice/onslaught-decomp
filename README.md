@@ -1,7 +1,7 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-11-02
+Last updated: 2026-11-06
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
@@ -20,8 +20,9 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 ## Related projects
 
 - [onslaught-ce](https://github.com/dlprentice/onslaught-ce): Onslaught CE, the native Linux and Windows port built
-  from this decompilation; play the game here.
-- [onslaught-godot](https://github.com/dlprentice/onslaught-godot): the Godot rebuild of the game.
+  from this decompilation; download it here (bring your own copy of the game).
+- [onslaught-godot](https://github.com/dlprentice/onslaught-godot): the Godot rebuild of the game (a proof of concept,
+  not yet a playable release).
 - [onslaught-preservation](https://github.com/dlprentice/onslaught-preservation): documentation of the game's
   formats, saves, mechanics, levels and engine.
 - [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor): the companion app for careers,
@@ -41,6 +42,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | `docs/SCORE.md` | the score, the matched functions and the functions this tree leaves out, rewritten by `tools/decomp.py score` |
 | `docs/check/` | the check this tree's score comes from: a summary of its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |
 | `THIRD-PARTY.md` | the third-party material in `src/`, and what is left out |
+| `CONTRIBUTING.md`, `SECURITY.md`, `.github/` | how to contribute and where each kind of work goes, how to report a security problem, and the issue forms and pull request template |
 
 ## What it is, and what it is not
 
@@ -94,10 +96,12 @@ You need, all from your own copies:
   mission-script files are compiled in; `config/game-data.sha256` pins them).
 - **Visual C++ 6.0 SP5 Professional**: CL 12.00.8804 driving C1 12.00.8867, C1XX 12.00.8964 and C2 12.00.8966 (the
   `c2.dll` SP5 installs from `msvcep.dll`), LINK 6.00.8447. The binaries must match `config/toolchain.sha256`, and
-  the `VC98/Include` tree the manifest `config/vc6-include.sha256` (993 files).
+  the 993-file `VC98/Include` tree the single-digest manifest `config/vc6-include.sha256`.
 - **The DirectX 9.0 SDK** (`dx9sdk.exe`, SHA-256 `3825dec8…`): its `Include/` folder (`config/dx9sdk-include.sha256`)
   and its sample framework's `Samples/C++/Common/Include/` (`config/dx9samples-include.sha256`).
-- **Wine** able to run 32-bit programs, **Python 3**, and GNU binutils' `objdump` (for `diff` and `dis`).
+- **Wine** able to run 32-bit programs, **Python 3** (the unit tests ran on 3.14; older versions are untested),
+  **`llvm-undname`** from the LLVM package (the check and the score demangle names with it), and GNU binutils' `objdump`
+  (for `diff` and `dis`). `tools/equiv.py` also needs Unicorn (`pip install -r requirements.txt`).
 
 ### The compiler's paths
 
@@ -156,14 +160,22 @@ python3 tools/decomp.py score                     # full check; rewrites docs/SC
 ```
 
 Every input is checked against its pin before anything compiles; a changed or missing file stops the tools with the
-file's name. The tools write only under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, in
-the Wine prefix (including the links above) and in the temporary folder, except that the score command also
-rewrites the tracked report `docs/SCORE.md`.
+file's name. The tools write under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, in the Wine
+prefix (including the links above) and in the temporary folder. Four commands change a tracked file, and each says so in
+its docstring: `decomp.py score` rewrites `docs/SCORE.md`, `objmap.py` rewrites `config/objects.tsv`, `rtti.py` rewrites
+`config/classes.tsv`, and `witness_scan.py` edits one file under `src/` while it runs and restores it afterwards. Run
+`git status` after them.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md): changes come in as issues and pull requests, are checked against the full
-byte comparison in the working tree, and arrive here with the next export. `src/` files keep their line counts.
+See [CONTRIBUTING.md](CONTRIBUTING.md). It says which public repository takes which kind of work, what a first
+contribution needs (text fixes need nothing but Git; tool work needs Python; matching work needs your own game,
+compiler and SDK), and how to report a problem. Changes come in as issues and pull requests, are imported by the
+maintainer into the working source, checked there against the full byte comparison, and arrive here with the next
+export, with credit; a pull request is not merged directly because this tree is generated. Questions and ideas go to
+[Discussions on onslaught-ce](https://github.com/dlprentice/onslaught-ce/discussions). Files seeded from the
+game's source release keep their line counts. The unit tests are one command, with no game or toolchain:
+`python3 -m unittest discover -p '*_tests.py' -s tools`.
 
 ## Licence
 

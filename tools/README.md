@@ -1,15 +1,26 @@
 # Matching tools
 
 Status: active reference
-Last updated: 2026-10-22
+Last updated: 2026-11-06
 Summary: what each tool in this folder is for, what it reads and writes, and its limits.
 
 Every tool reads its inputs from the environment variables in the top-level README ("Reproducing the match") and
-writes only under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, the Wine prefix, and the
-system's temporary folder (`BEA_TMP` for `icfsim.py`), except that the score command also rewrites the tracked report
-`docs/SCORE.md`. `equiv.py` also reads `BEA_MAIN` and `BEA_NAME_TABLE` (see the
-top-level README). Each script's docstring
-gives its full usage; each `*_tests.py` is its unit tests (`python3 -m unittest tools.decomp_tests`, for example).
+writes under this checkout's ignored `build/`, `src/data/` and `local-data/` folders, the Wine prefix, and the
+system's temporary folder (`BEA_TMP` for `icfsim.py`). Four commands change a tracked file: `decomp.py score` rewrites
+`docs/SCORE.md`, `objmap.py` rewrites `config/objects.tsv`, `rtti.py` rewrites `config/classes.tsv`, and
+`witness_scan.py` edits one file under `src/` while it runs and restores it afterwards. `equiv.py` also reads `BEA_MAIN`
+and `BEA_NAME_TABLE` (see the top-level README). Each script's docstring gives its full usage; each `*_tests.py` is its
+unit tests.
+
+## The unit tests
+
+    python3 -m unittest discover -p '*_tests.py' -s tools     # from the repository root
+
+These need no game, compiler or SDK. On a tree without those inputs, 9 tests skip, and that is expected: 2 need the
+Visual C++ 6 toolchain, 2 need the retail executable, 1 module needs Unicorn (`requirements.txt`) and 4 cover research
+scanners that are not published. A skip is not a failure; `OK (skipped=9)` is the usual result here. One module runs
+alone as `python3 -m unittest tools.decomp_tests`, for example. The tools that demangle names (`decomp.py check` and
+`score`, and `rtti.py`) need `llvm-undname` from the LLVM package.
 
 ## The match
 
@@ -17,6 +28,7 @@ gives its full usage; each `*_tests.py` is its unit tests (`python3 -m unittest 
     python3 tools/decomp.py diff 0x004a2a20                 # side-by-side disassembly against retail
     python3 tools/decomp.py dis 0x004a2a20                  # retail disassembly with callee names and import slots
     python3 tools/decomp.py score                           # full check; rewrites docs/SCORE.md
+    python3 tools/decomp.py build                           # compile every source into build/ without comparing
 
 - `decomp.py`: compiles each source with the pinned Visual C++ 6 under Wine and compares every annotated function's
   COMDAT section with the retail bytes at its address; its docstring states the matching rules. `binfmt.py` reads the
@@ -24,7 +36,9 @@ gives its full usage; each `*_tests.py` is its unit tests (`python3 -m unittest 
 - `equiv.py ADDRESS`: a bounded differential test of one function in an emulator (needs Unicorn,
   `requirements.txt`). Both bodies run at the retail address; exit 0/1/2 = sampled agreement, difference,
   inconclusive. It is a falsifier, not an equivalence proof: unobserved branches, faulting runs and unresolved
-  dependencies cannot pass, and its call boundaries are a stub model.
+  dependencies cannot pass, and its call boundaries are a stub model. `tools/tests/inline_budget.cpp` is a small
+  fixture that shows the compiler's per-function inline budget; its header comment says how to build it, and
+  `notes/compiler-findings.md` records what was measured.
 - `witness_scan.py`: header-count witnesses, functions whose bytes depend on how many declarations precede them in
   their translation unit, and the window in which each still matches.
 

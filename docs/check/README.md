@@ -1,12 +1,14 @@
 # The check behind the score
 
 Status: retained comparison evidence with a documentation-only export
-Last updated: 2026-11-02
+Last updated: 2026-11-06
 Summary: the check this tree's score comes from: how it was run, a summary of its log (the full log is not published; its SHA-256 is given here), and its table of matched symbols.
 
-Code-changing exports require `python3 tools/decomp.py score` from the exported tree itself, with the README's pinned
-inputs and fixed compiler paths. A documentation-only export may retain a previous result only after all compared
-source, configuration, tools and input pins are checked unchanged. Its publication does not imply a new score run.
+Code-changing exports carry a `python3 tools/decomp.py score` run from the exported tree itself, with the README's
+pinned inputs and fixed compiler paths; the maintainers run it when they import a change. A pull request owes the
+`check` run on its changed files (CONTRIBUTING.md), not a score. A documentation-only export may retain a previous
+result only after all compared source, configuration, tools and input pins are checked unchanged. Its publication does
+not imply a new score run.
 
 This documentation-only update retains the comparison evidence published at public commit
 `9169f28862ebda0b768cbcc7ec354734af013f5e`. The score, matched table and check summary are unchanged; no new score was

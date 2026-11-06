@@ -1,7 +1,7 @@
 # onslaught-decomp: guide for automated agents
 
 Status: active
-Last updated: 2026-11-02
+Last updated: 2026-11-06
 Summary: the rules for agents working in this repository.
 
 This repository is generated from the maintainers' working source. Contributors may edit and commit proposals on
@@ -12,7 +12,8 @@ not required for the documented public function-check route.
 - Licence: `REUSE.toml` maps each path (code GPL-3.0-only, `COPYING`; notes CC BY-SA 4.0).
 - Never add the game's files or anything derived from them (executables, data, saves, captures, byte dumps), any part
   of the Visual C++ 6 toolchain or the DirectX SDK, or decompiler output.
-- `src/` files keep their line counts: `__LINE__` values are compiled into the retail code.
+- Files in `src/` seeded from the game's source release keep their line counts: `__LINE__` values are compiled into
+  the retail code.
 - A function's match is decided by `python3 tools/decomp.py check`, not by reading the source. Report what the
   check printed, before and after a change.
 - Inputs come from environment variables (`README.md`, "Reproducing the match"); never write machine paths into a

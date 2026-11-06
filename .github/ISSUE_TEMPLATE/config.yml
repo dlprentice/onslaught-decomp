@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ask a question or share an idea
+    url: https://github.com/dlprentice/onslaught-ce/discussions
+    about: Questions and ideas go to Discussions on onslaught-ce, the project's one Discussions page.
+  - name: Report a security vulnerability
+    url: https://github.com/dlprentice/onslaught-decomp/security/advisories/new
+    about: Report security problems through this form, not as a public issue (see SECURITY.md).

@@ -40,6 +40,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | `linklib/` | the link's provisional, link-only pieces, labelled as such; never part of the score |
 | `config/` | the compiler flags, the SHA-256 pins of every input but the executable (its pin is in `tools/decomp.py`), the function table, the link order ([config/README.md](config/README.md)) |
 | `tools/` | the matching check, the linker and link comparison, the whole-executable inventory and data tools ([tools/README.md](tools/README.md)) |
+| `tools/ghidra/` | a Ghidra script that names the functions of this tree's function table in your own copy of the executable ([tools/ghidra/README.md](tools/ghidra/README.md)) |
 | `notes/` | the matching knowledge: the toolchain, compiler behaviour, techniques, divergences from Stuart's source and the link ([notes/README.md](notes/README.md)) |
 | `docs/SCORE.md` | the score block (the summary and the matched functions), rewritten by `tools/decomp.py score`; the list of functions this tree leaves out sits outside that block |
 | `docs/check/` | the check this tree's score comes from: a summary of its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |

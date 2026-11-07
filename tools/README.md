@@ -70,3 +70,13 @@ alone as `python3 -m unittest tools.decomp_tests`, for example. The tools that d
 names from the decompilation ([config/README.md](../config/README.md)). `config/function-corrections.tsv` records each
 correction to its extents with its evidence: a wrong extent, a block that is not a function, a function the table
 lacked.
+
+## Names for your own Ghidra database
+
+    ghidra/ApplyOnslaughtNames.py     # run inside Ghidra, on your own copy of the retail executable
+
+- `ghidra/ApplyOnslaughtNames.py`: names, sizes and source-file comments for every function in the function table
+  (`config/functions.tsv` and `config/function-corrections.tsv`), applied to a Ghidra program imported from your own
+  copy of the game. It refuses any other executable by its SHA-256 and publishes no database, bytes or decompiler
+  output. [ghidra/README.md](ghidra/README.md) says how to run it, in the GUI and headless, and what it leaves out;
+  `ghidra_tests.py` tests it without Ghidra.

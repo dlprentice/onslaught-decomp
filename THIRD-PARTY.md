@@ -1,7 +1,7 @@
 # Third-party material
 
 Status: active
-Last updated: 2026-10-29
+Last updated: 2026-11-06
 Summary: the third-party material in this repository's source, and the third-party files the game linked that this
 repository leaves out.
 
@@ -17,12 +17,13 @@ own copies, checked by SHA-256 (README, "Reproducing the match").
 | `src/oggvorbis.h` | declarations from the Xiph.Org libogg and libvorbis 1.0 headers | BSD-3-Clause (Xiph.Org Foundation; `LICENSES/BSD-3-Clause.txt`), with this project's GPL-3.0-only |
 | `src/OggFileRead.cpp` | its decode loop follows Xiph.Org's `decoder_example.c` (libvorbis 1.0), turned into a class | BSD-3-Clause (Xiph.Org Foundation), with this project's GPL-3.0-only |
 | `src/adpcm.c` | the IMA ADPCM step tables (Jack Jansen's public reference implementation) | public reference tables |
+| `src/WavRead.h` | written for this project in place of the DirectX SDK sample's header; the interface is the one the game's code uses | GPL-3.0-only (the file's own SPDX header) |
 
 ## Left out
 
 | File the game linked | From | Why |
 | --- | --- | --- |
-| `src/wavread.cpp`, `src/WavRead.h` | the DirectX SDK's wave-file sample | Microsoft sample code that Stuart's release does not include. `src/WavRead.h` here is this project's own declaration of the same interface (GPL-3.0-only). |
+| `src/wavread.cpp` | the DirectX SDK's wave-file sample | Microsoft sample code that Stuart's release does not include. Its header is replaced by `src/WavRead.h`, listed above. |
 | `src/dxutil.cpp`, `src/d3dutil.cpp` | the DirectX SDK sample framework's utility code | Microsoft sample code that Stuart's release does not include |
 | `src/DXFont.cpp` | the DirectX SDK sample framework's font class (`CD3DFont`), reworked by the game | Microsoft sample code that Stuart's release does not include |
 | the SDK sample framework's headers (`D3DUtil.h`, `DXUtil.h` and others) | the DirectX 9.0 SDK | read at build time from your copy of the SDK (`BEA_DX9_SAMPLES_INCLUDE`) |

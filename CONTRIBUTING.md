@@ -69,8 +69,9 @@ Steps:
    describe the change itself; keep session links, machine paths and anything copied from the game out of them. A
    `Co-Authored-By` trailer is welcome when someone else wrote part of the change.
 5. Run the checks again and open the pull request. The form asks for the base commit, the changed files, the exact
-   commands and before/after summaries, and what you could not run. Maintainers run the remaining acceptance gate
-   before the work is imported. Do not add hosted CI.
+   commands and before/after summaries, and what you could not run. Maintainers then run the acceptance gate,
+   `python3 tools/decomp.py score` (see [Rules for `src/`](#rules-for-src)), on the working source before work that can
+   affect compiled output is imported. Do not add hosted CI.
 
 ## Reporting a problem
 

@@ -39,7 +39,8 @@ alone as `python3 -m unittest tools.decomp_tests`, for example. The tools that d
   dependencies cannot pass, and its call boundaries are a stub model. `tools/tests/inline_budget.cpp` is a small
   fixture that shows the compiler's per-function inline budget; its header comment says how to build it, and
   `notes/compiler-findings.md` records what was measured.
-- `witness_scan.py`: header-count witnesses, functions whose bytes depend on how many declarations precede them in
+- `witness_scan.py`: header-count witnesses (CGame::DrawDebugStuff, CD3DApplication::BuildDeviceList, the CPDTimeline rows,
+  CFEPGoodies::Render, CDamageTexture::Load), functions whose bytes depend on how many declarations precede them in
   their translation unit, and the window in which each still matches.
 
 ## The link
@@ -48,7 +49,7 @@ alone as `python3 -m unittest tools.decomp_tests`, for example. The tools that d
 
 - `link.py`: links the compiled objects into a candidate `BEA.exe` with the pinned linker, in retail's object and
   library-member order (`config/link-objects.txt`, `config/link-library-order.txt`); refuses a changed input
-  (`config/link-inputs.sha256`, under `BEA_LAB`).
+  (`config/link-inputs.sha256`, under `BEA_LAB`). Its further inputs are not freely available ([README, What is left out](../README.md#what-is-left-out)), so it stops when they are missing; the function check does not need them.
 - `linkcmp.py`: compares a linked executable with retail, one number per stage (header, sections, symbols, imports,
   resources).
 - Linker models, each checked against the real linker: `icfsim.py` (identical-COMDAT folding and its survivors),

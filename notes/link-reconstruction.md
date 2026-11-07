@@ -1,7 +1,7 @@
 # Link reconstruction
 
 Status: active
-Last updated: 2026-10-16
+Last updated: 2026-11-06
 Summary: how the link is rebuilt, what is proven, conceded and open.
 
 How `tools/link.py` rebuilds the retail executable's link, which mechanisms are proven (with the evidence), what is
@@ -11,7 +11,7 @@ commit, so rerun the tools instead of quoting numbers from here.
 
 ## State of the executable
 
-Measured 2026-10-16 (UTC) on the full working tree, which also holds the 33 functions of the four DirectX SDK sample files this tree leaves out: all 5,482 game functions match in both columns (this tree matches 5,449). "Before" is main; Regenerate with `python tools/decomp.py check`, `python tools/link.py --no-compare`, `python tools/alignedeq.py LINKDIR --data-events`.
+Measured 2026-10-16 (UTC) on the full working tree, which also holds the 33 functions of the four DirectX SDK sample files this tree leaves out: all 5,482 game functions match in both columns, before and applied (the table below; this tree matches 5,449, the public figure). The 5,482 figure is this 2026-10-16 result on the full working tree, which is not published here, and cannot be reproduced from this repository. "Before" is main; Regenerate with `python tools/decomp.py check`, `python tools/link.py --no-compare`, `python tools/alignedeq.py LINKDIR --data-events`.
 
 | | before | applied |
 |---|---|---|
@@ -32,9 +32,9 @@ PauseMenu's two COMMON buffers (Proven mechanisms). What then still separates th
   where its static is defined, so retail's late ones mean later definitions).
 - Library members: d3dx9's build is confirmed (below), so what is left there is member order; LIBCMT's member spans
   (about ±2,800 bytes).
-- `.rdata` order: the RTTI locator walk, 96% of 32,024 bytes of churn (Open questions).
+- `.rdata` order: the RTTI locator walk, 96% of 32,024 bytes of churn (an undated run; Open questions).
 - `.data` and `.bss` order: the dynamic-init and function-local emission family, oids' vtable walk, and small items.
-- Small sizes and derived fields: `.bss` objects (Lights +64, Shell +16, a few tails), headers and Rich, the import
+- Small sizes and derived fields: `.bss` objects (a few tails), headers and Rich, the import
   table's order (Open questions).
 
 ## Stage model
@@ -48,8 +48,8 @@ PauseMenu's two COMMON buffers (Proven mechanisms). What then still separates th
 2. **Object order** (`config/link-objects.txt`). Six groups, each case-insensitive alphabetical: main game; ltshell and
    PC platform; front-end and PC misc; the DirectX sample framework; `MissionScript/`; the DX renderer. A few objects
    sort under another original name (renderinfo, renderqueue, screenfx, OPtrSet, NormalSquadTargetSelector,
-   MCDestructableSegments, PDSimpleSprite, PCMusicStream); no-code objects (MemoryCard, Profile) sit alphabetically. Library members follow `config/link-library-order.txt` (313 members in retail's `.text`
-   order: LIBCMT block from `0055d6a0`, NvTriStrip and STL from `0056eb50`, d3dx9, DxErr9, then the LIBCMT members
+   MCDestructableSegments, PDSimpleSprite, PCMusicStream); no-code objects (MemoryCard, Profile) sit alphabetically. Library members follow `config/link-library-order.txt` (331 rows, each linked in retail's order; the 14 with no code are placed by their `.data` or `.bss`:
+   LIBCMT block from `0055d6a0`, NvTriStrip and STL from `0056eb50`, d3dx9, DxErr9, then the LIBCMT members
    only they need from `005d04ec`).
 3. **COMDAT selection and order.** `/Gy` (implied by `/O2`) makes every function a COMDAT. Which object emits an
    inline or virtual function, and in what order, decides ICF input and layout. Rules measured and applied: out-of-line definitions emit in source order; a static function is deferred until after its first
@@ -62,7 +62,7 @@ PauseMenu's two COMMON buffers (Proven mechanisms). What then still separates th
 ## Proven mechanisms
 
 ### ICF and Microsoft's qsort
-LINK sorts its array of foldable contributions with MSVCRT `qsort` on (raw size, a 16-bit word = relocation count) and keeps the first identical copy in sorted order. Wine's builtin `qsort` orders equal keys differently (survivors differ in 171 of 248 groups), and `msvcrt` is a Wine known DLL, so a copy beside LINK.EXE never loads. `link.py` links in its own prefix (`link_prefix()`) whose `syswow64/msvcrt.dll` is the pinned native DLL (VC6 SP5, 6.00.8797.0, SHA-256 in `config/toolchain.sha256`) with `msvcrt=n,b`, and refuses to link unless the `+loaddll` trace shows the native DLL. `tools/icfsim.py` rebuilds the array (pass-1 order; one record per COMDAT at its first definer; associative COMDATs with their parent; no `_$E` names; no non-COMDAT `.text`) and predicts all survivors (249 of 249 on the frozen link). A fold also requires equal **compiler COMDAT checksums** (aux bytes 8..11 of the section symbol): identical bytes with different checksums do not fold (the `~CProfileFn`/`~CMechEntryProfile` case). Retail's fold groups are the function names that share a retail address; a group folds only inside one COMDAT class (inline = selection 2, map flag `i`; non-inline = selection 1, flag `f`), so an inline definition is placed in the object that emits its class table (WorldPhysicsManager.cpp, rtmesh.cpp, ParticleSet.cpp, Unit.cpp). Survivors depend on the whole array (deleting one record changes 97..155 of 249), so `icfsim.py --report` measures convergence instead: (a) size keys, (b) inline-emission placement, (c) library records. An example of that sensitivity: making `CRoundData::Unknown40d0f0` a plain function folds weapon.cpp's identical `IsBallistic` into it, which brought the game code's end to retail's (+0, library at `0055d6a0`) and `.text` bytes equal in place from 121,284 to 210,130. The same change flipped the survivors of 12 other groups, among them d3dx9's `sse`/`sse2` `D3DXVec3TransformNormal` (retail keeps the `sse2` copy), so `.text` stayed +64. On nine groups with a known retail object the survivor was right in 5 (4 before).
+LINK sorts its array of foldable contributions with MSVCRT `qsort` on (raw size, a 16-bit word = relocation count) and keeps the first identical copy in sorted order. Wine's builtin `qsort` orders equal keys differently (survivors differ in 171 of 248 groups), and `msvcrt` is a Wine known DLL, so a copy beside LINK.EXE never loads. `link.py` links in its own prefix (`link_prefix()`) whose `syswow64/msvcrt.dll` is the pinned native DLL (VC6 SP5, 6.00.8797.0, SHA-256 in `config/toolchain.sha256`) with `msvcrt=n,b`, and refuses to link unless the `+loaddll` trace shows the native DLL. `tools/icfsim.py` rebuilds the array (pass-1 order; one record per COMDAT at its first definer; associative COMDATs with their parent; no `_$E` names; no non-COMDAT `.text`) and predicts all survivors (249 of 249 fold groups, as counted in the 2026-10-16 status under Open questions). A fold also requires equal **compiler COMDAT checksums** (aux bytes 8..11 of the section symbol): identical bytes with different checksums do not fold (the `~CProfileFn`/`~CMechEntryProfile` case). Retail's fold groups are the function names that share a retail address; a group folds only inside one COMDAT class (inline = selection 2, map flag `i`; non-inline = selection 1, flag `f`), so an inline definition is placed in the object that emits its class table (WorldPhysicsManager.cpp, rtmesh.cpp, ParticleSet.cpp, Unit.cpp). Survivors depend on the whole array (deleting one record changes 97..155 of 249), so `icfsim.py --report` measures convergence instead: (a) size keys, (b) inline-emission placement, (c) library records. An example of that sensitivity: making `CRoundData::Unknown40d0f0` a plain function folds weapon.cpp's identical `IsBallistic` into it, which brought the game code's end to retail's (+0, library at `0055d6a0`) and `.text` bytes equal in place from 121,284 to 210,130. The same change flipped the survivors of 12 other groups, among them d3dx9's `sse`/`sse2` `D3DXVec3TransformNormal` (retail keeps the `sse2` copy), so `.text` stayed +64. On nine groups with a known retail object the survivor was right in 5 (4 before).
 
 ### Library identity: d3dx9
 The pinned `d3dx9.lib` is the DirectX 9.0 SDK's (`D3DX_SDK_VERSION` 9), byte-identical to `Lib/d3dx9.lib` in
@@ -75,8 +75,7 @@ C2 writes an object's functions in definition order. A `static` function comes o
 address before the caller means the original was external. Inline functions needed out of line (by a vtable, a call
 the inliner declined, a `delete []` helper) are deferred and come out in a batch after the **later of their first user
 and their own definition point**, in the order of their definitions in the translation unit (include order). So an `inline` function defined after its user comes out after its definition: `CFEPBEConfig::GetCurrentLevel`
-defined last, `CGroundVehicleGuide::GetPath` declared in its class and defined after `Unknown3`
-. A class's vtable brings out its in-class inline virtuals (inherited ones included) and then `??_G` after
+defined last, `CGroundVehicleGuide::GetPath` declared in its class and defined after `Unknown3`. A class's vtable brings out its in-class inline virtuals (inherited ones included) and then `??_G` after
 the first function whose vptr store survives optimization: a derived constructor that expands its base's constructor
 does not emit the base's vtable group, because that store is dead (probed). Moving definitions never moves `??_G` (Open
 questions). Several of retail's late groups are a function that was inline in the original, so its copy heads the
@@ -84,26 +83,26 @@ trigger's batch: `CParticleDescriptor`'s constructor, `CRTTree::GetRTRadius`,
 `CRTMesh::GetRTRadius` and `CSquad::SetAIState` (squad's order also fits the open case in Open questions), each with
 unchanged code. An out-of-line function that callers inline and `/OPT:REF` then drops still places what it pulls in
 (`??_G`, vector constructor helpers) right after itself. `FollowParticle` in ParticleDescriptor.cpp is
-such a function, reconstructed from placement: defined after `TransmitFoR`, it places
-`CParticleEffectLink::SetPos` and `SetOrientation` there, as retail does (object 320 to 48 misplaced inline bytes).
-Being one more foldable record, it moved about 1,070 names' survivors: misplaced 208 to 202 and the summed region
-deviation 8,112 to 7,392, but the game code's end went from +0 to −16 and the nine known groups from 6 to 1 right.
+such a function, reconstructed from placement: defined after `TransmitFoR` in the tree, it places
+`CParticleEffectLink::SetPos` and `SetOrientation` there, as retail does (the misplaced inline bytes in the object went from 320 to 48).
+Being one more foldable record, it moved about 1,070 names' survivors: the misplaced count fell from 208 to 202 and the summed region
+deviation fell from 8,112 to 7,392, but the game code's end went from +0 to −16 and the number of the nine known groups with a right survivor fell from 6 to 1.
 Small virtuals defined `inline` in the `.cpp` before the constructor come out in its vtable group, ahead of `??_G`,
 as retail's CRound and CNormalSquad do.
 
 ### Precompiled header
 Retail compiled with a PCH made from `common.h` (`/Yc`, then `/Yu`). Under `/Yu` an object's uninitialised and
 dynamically initialised definitions come out in **reverse** definition order and its explicitly initialised ones
-(`= 0`) follow in definition order; without it the uninitialised ones follow a name hash. `decomp.py` builds
-`src/pch.cpp` on demand; `config/no-pch.txt` lists the 18 sources built without it, each with its reason.
+(`= 0`) follow in definition order; without it the uninitialised ones follow a name hash. `decomp.py` compiles the
+tracked `src/pch.cpp` into the precompiled header under `build/pch/` on first use; `config/no-pch.txt` lists the 15 sources built without it, each with its reason.
 
 ### C runtime: Visual C++ 6.0 SP5 LIBCMT
 The Rich header records the CRT at compiler build 8047 (167 C, 10 C++ members). Only SP5's `libcmt.lib` (2000-08-23, in
-SP5's `vs6sp5.exe`) has them; the SP6 file (build 9782) and the RTM file (8168) do not. `libcpmt.lib` is identical.
+SP5's `vs6sp5.exe`) has them; the SP6 file (build 9782) and the RTM file (8168) do not. The pinned `libcpmt.lib` comes from `third-party/msvc6-crt/` (`config/link-inputs.sha256`), not from the folder of the SP5 `libcmt.lib`, and this page records no comparison of its entries.
 
 ### NvTriStrip
 Retail links the old four-argument NvTriStrip API (void `GenerateStrips`, 24-byte faces, no restart) from NVIDIA's
-prebuilt `nvtristrip.lib`, and so does this link: 71 of retail's 72 functions (`0056eb50..00574250`) are identical
+prebuilt library (the pinned `NvTriStrip-ut2003-engine.lib`, `config/link-inputs.sha256`), and so does this link: 71 of retail's 72 functions (`0056eb50..00574250`) are identical
 with relocations masked. The one residual is `NvStripifier::RemoveSmallStrips` (see "NvTriStrip's release" below).
 
 ### Shader-fragment specimen data
@@ -114,7 +113,7 @@ from the pinned specimen into the ignored `src/data/NVShaderFragments.inc` (`lin
 
 ### Initializer order
 Retail's `.CRT$XCU` table (`00622000`, 706 slots) has 288 `ZERO_FVECTOR` and 271 `ID_FMATRIX` initializers and 19 empty
-ones. Thirteen objects register no `ID_FMATRIX` (their `*_CPP` guards in `mathsconst.h`/`mathsconst2.h`), and
+ones and 128 others (the C runtime's 8 among them). Thirteen objects register no `ID_FMATRIX` (their `*_CPP` guards in `mathsconst.h`/`mathsconst2.h`), and
 `STATICSHADOWS` belongs to `DXSurf.obj`. `.CRT$XI` holds `___onexitinit`, `___inittime`, `___initstdio`,
 `___initmbctable` and `__CxxSetUnhandledExceptionFilter`.
 
@@ -183,7 +182,7 @@ compiles.
     `FastVB.cpp` after `FASTVB`. It still expands into `FASTVB`'s initializer, because VC6 compiles a file's dynamic
     initializers at its end: an inline constructor defined after its object is still inlined there (probed).
   - pcsoundmanager is a third witness-coupled case. Retail creates `SOUND` after `sPitchVarianceEnabled`, but after
-    `ID_FMATRIX`, which arrives through `Game.h`'s include chain. That chain brings `WorldPhysicsManager.h`'s
+    `ID_FMATRIX`, which arrives through `game.h`'s include chain. That chain brings `WorldPhysicsManager.h`'s
     `CFeatureData`/`CHazardData::Resolve` bodies, which name `SOUND`. Removing them gives retail's `.bss` and loses
     `CD3DApplication::BuildDeviceList` (bdl); moving `BattleEngine.h`'s `PlayHudSample` (Stuart's placement) is
     harmless.
@@ -192,7 +191,7 @@ compiles.
     first, the reverse of retail's order, and retail has `SRS`/`STS` out of line.
   - DXImposter's `sCount` comes from `imposter.h`'s inline destructor, which other objects need; the object also has the
     open forward-funclet shape.
-  - BattleEngineConfigurations and BattleEngineDataManager belong to class (B): their header accessors fit retail, and
+  - BattleEngineConfigurations and BattleEngineDataManager belong to class (B), the objects whose only `.bss` difference is the early creation of `ZERO_FVECTOR` (next item): their header accessors fit retail, and
     only ZERO_FVECTOR's early creation differs (next item).
 - **Open: maths-constant creation points.** Retail's ZERO_FVECTOR/ID_FMATRIX are created at different moments per object.
   Early (last in memory): PCMemoryCard (ZERO after `sFindData`, `sFindHandle`; include at line 281), BattleEngineConfigurations,
@@ -228,7 +227,7 @@ compiles.
   const`) definition after an `extern` has external linkage in VC6 (`?ZERO_FVECTOR@@3VFVector@@B`), so every object using it
   would export the name and collide at link (LNK2005). Not the original form.
 - **Class statics** land after the file's group-1 objects when an in-class body (an accessor or an inline constructor)
-  names them, since that creates them at the class definition (BattleEngineConfigurations, FastVB before ,
+  names them, since that creates them at the class definition (BattleEngineConfigurations, FastVB,
   ResourceAccumulator); otherwise a class static is created at its definition like any symbol (a probe: `struct K { static int ks; }; static int pa; int K::ks; static int pb;` gives `pb, ks, pa`, and an in-class `Get()`
   naming `ks` puts it last).
 
@@ -273,15 +272,14 @@ leaves, image equal with RVAs rebased). Header fields are compared per field (34
 under `build/` for relocations.
 
 - Plain `alignedeq LINKDIR`: each retail-paired function (4,615) compared with retail's at its own address over
-  retail's extent. Three numbers: raw 93.78%, REL32 operands masked 95.93%, every relocated word masked 100.00%. The last
+  retail's extent. Three numbers: raw 93.80% (the before column above), REL32 operands masked 95.93%, every relocated word masked 100.00%. The last
   one is "code identical except addresses"; at 100.00% the remaining differences in `.text` are all addresses (calls and
   jumps by placement and library layout, absolute words by data layout). The masks are our objects' COFF relocations (retail
   has no `.reloc`), found through the object folders, split by function inside a plain `.text` section, and followed through
   ICF folds (a folded name takes the relocations of the name at its address that has an object section).
 - `--breakdown`: the unequal relocated words by what our word points at. REL32: other game object 16,721 of 17,400, library
   1,391 of 1,427, same object 416 of 2,738, import thunk 61 of 61. DIR32 (the ~51 KB of the 4.07% step): `.bss` 15,931 words,
-  `.rdata` 8,562, `.data` 6,554, code (function pointers) 1,111. No call is wired wrongly: of the 19,700 unequal words that
-  point into `.text`, 17,449 target the function retail's word points at, none a different one. Calls differ because caller and
+  `.rdata` 8,562, `.data` 6,554, code (function pointers) 1,111. Of the 19,700 unequal words that point into `.text`, 17,449 target the function retail's word points at, and none targets a different one; the other 2,251 are not classified here, so the figures do not show that no call is wired wrongly. Calls differ because caller and
   callee sit at different shifts, data words because every data section is shifted.
 - `--data-events`: pairs our data with retail's through the code's own DIR32 references (our word against retail's word),
   groups targets into runs of constant ours-minus-retail offset, keeps the heaviest run of runs whose offset never increases
@@ -289,18 +287,18 @@ under `build/` for relocations.
   says how many referenced words become equal after N bytes are inserted in address order. Words off the chain are references
   to data retail places elsewhere (a second ladder, or placeholders).
 
-State:
+State (an undated snapshot; its `.data` chain of 5,512 matches none of the states quoted below, so rerun `tools/alignedeq.py` for current values):
 
 | Section | Referenced words | Chain | Steps | What would make the chain equal |
 |---|---|---|---|---|
-| `.bss` | 15,931 | 11,440 words in 53 runs | 35,456 bytes retail has that we lack; the first ~500 bytes carry 2,903 words, ~17.5 KB (through PCPlatform and ltshell) 11,424 | the placeholder class (concession): DXSurf 16.3 KB, ltshell `mRenderStates` 6.6 KB, Profile 6.1 KB are big holes with 34 reference words, the staircase of steps up to 1.6 KB carries the words |
+| `.bss` | 15,931 | 11,440 words in 53 runs | 35,456 bytes retail has that we lack (the chain's steps; the concessions below total 35,131 unreferenced bytes, and the 325 difference is not reconciled); the first ~500 bytes carry 2,903 words, ~17.5 KB (through PCPlatform and ltshell) 11,424 | the placeholder class (concession): DXSurf 16.3 KB, ltshell `mRenderStates` 6.6 KB, Profile 6.1 KB are big holes with 34 reference words, the staircase of steps up to 1.6 KB carries the words |
 | `.data` | 6,576 | 5,512 words in 56 runs | 208 bytes of 4..16-byte steps (the chain begins at +32; the lowest referenced datum is at +0 in both images, so that is not extra bytes) | the causes below |
 | `.rdata` | 8,568 | 6,334 words in 21 runs | IAT (the chain begins at +28 by permutation, not bytes; 16 bytes of zero dwords after zlib's slots against ours 4), dxguid -1,036 | the causes below |
 
 Causes found (each checked against the specimen):
 
 - **Import address table.** Same 14 DLL blocks in the same order and the same slot counts. Retail has one extra zero dword after KERNEL32's 112 slots (MSVFW32's null thunk: blocks sort by DLL name and MSVFW32 sorts between KERNEL32 and USER32, the ghost of the dropped AVI recorder) and 12 more zero bytes after the last block, so the first vtable pool sits 16 bytes lower in ours (every `actor.obj` `.rdata` word, ~6,300). The 12 are not further DLLs: `.rdata` starts on a 16-byte boundary after `.idata$5`, so with the one thunk `.idata$5` ends at `0x5d83c4` and `.rdata` starts at `0x5d83d0` (the import stand-in row). The slots inside a DLL are permuted (KERNEL32 112 of 112 positions, USER32 35 of 37, GDI32 16, WINMM 8, binkw32 12, zlib 2, ogg 11, vorbis 13, VERSION 2). The "28 bytes too many at the start" of the `.rdata` fill curve is this permutation seen through the `__imp_` references, not bytes.
-- **dxguid.** (dilib4 landed: dinput8's `dilib4.obj` after `dxerr9.obj` in `link-library-order.txt` places `c_dfDIJoystick2`, whose object formats sit at `005cfa30` (retail `005cfaa0`) and its DIDATAFORMAT before dxguid, moves the late-LIBCMT tail from -0xac3 to -0x7c and shrinks the dxguid step from -1,064 to -544; `.text` +16, so the +99 window has 19 bytes of slack. The figures below are from before it.) Not missing GUIDs: retail's dxguid block (16 symbols, 256 bytes) equals ours byte for byte. The -1,036 step is
+- **dxguid.** (dilib4 landed: dinput8's `dilib4.obj` after `dxerr9.obj` in `link-library-order.txt` places `c_dfDIJoystick2`, whose object formats sit at `005cfa30` (retail `005cfaa0`) and its DIDATAFORMAT before dxguid, moves the late-LIBCMT tail from -0xac3 to -0x7c and shrinks the dxguid step from -1,036 to -544; `.text` +16 (from +80 to +96), so the +99 window has 3 bytes of slack. The figures below are from before it, and -1,036 is their before-value, as in the State table.) Not missing GUIDs: retail's dxguid block (16 symbols, 256 bytes) equals ours byte for byte. The -1,036 step is
   d3dx9/dxerr9 order ahead of it: the dxerr9 strings (3,497 publics) sit 3,328 bytes lower in ours, the d3dx9 init/
   cpslegacyprogram block (3.2 KB) is about 99 KB earlier in retail, and a 1,040-byte table of 12-byte records (flag, 0, 0, ending
   in a pointer into `.text`) lies right before dxguid in retail and after it in ours (476 bytes match).
@@ -315,7 +313,7 @@ Causes found (each checked against the specimen):
   towards 0 while earlier steps stay open moves words off the heaviest non-increasing run: the equal-word and fill numbers are the
   progress measure. Open, end stage:
   - Retail lacks the copy in FrontEndData, MotionController, DXFMV and DXShadows (byte-checked; for MotionController, Stuart's
-    Music.cpp reaches `weapon.h` through `career.h`, so the extra copy is MotionController's). Each needs an include that brings
+    Music.cpp reaches `weapon.h` through `Career.h`, so the extra copy is MotionController's). Each needs an include that brings
     `weapon.h` in, so this is evidence that retail's FrontEnd/game header graph differed for those units.
   - Four one-word gaps have two candidate objects each: DiveBomberGuide/Dropship, HiveBossGuide/HLCollisionDetector,
     MCMine/MCSentinel, NormalSquadTargetSelector/Geometry. The image bytes are the same either way, so the attribution would be a
@@ -335,10 +333,9 @@ Causes found (each checked against the specimen):
   Retail's Controller and gcgamut pools carry further words (an initialised 7-bool array before `cg_renderimposters`,
   `1`s before type descriptors) that are copies of `kWeaponCoolRate` or statics not found yet.
 - **One constant, two names.** `2.55f` was `__real@4@4000a333330000000000` (Carver, DXCockpit) beside BattleEngine's double-named
-  `__real@4@4000a333333333333800`; retail has one copy shared by the three. Respelled as BattleEngine's `255.0f-(mStealth/100.0f*255.0f)`
- : `.rdata` chain 6,334 -> 6,813 words, `.data` 5,520 -> 5,697, and CPhysicsScriptStatements' -8 is gone.
+  `__real@4@4000a333333333333800`; retail has one copy shared by the three. Respelled as BattleEngine's `255.0f-(mStealth/100.0f*255.0f)`: `.rdata` chain 6,334 -> 6,813 words, `.data` 5,520 -> 5,697, and CPhysicsScriptStatements' -8 is gone.
 
-Fixed: Controller, the 2.55 constant. End-stage: the `.bss` placeholders (35,456 bytes behind
+Fixed: Controller, the 2.55 constant. End-stage: the `.bss` placeholders (35,456 bytes of steps, of which the concessions below cover 35,131, behind
 the first ~17.5 KB staircase), the IAT tail and slot order, d3dx9 member order (the 1,040-byte table, the cps
 members), RTTI creation order, the weapon.h include sets, the dropped functions in animation and console.
 
@@ -346,16 +343,16 @@ members), RTTI creation order, the weapon.h include sets, the dropped functions 
 
 | Tool | Use |
 |---|---|
-| `tools/link.py` | the pinned link; |
+| `tools/link.py` | the pinned link |
 | `tools/linkcmp.py` | header, sections, symbols at retail addresses, order metric, imports, resources; `--write-expected` writes the symbol→address file the other tools read |
 | `tools/icfsim.py` | ICF simulator; `--report --expected X.json` measures convergence |
 | `tools/rttiorder.py` | `survey`: each object's `??_R4` order against retail's; `search OBJ`: the creation-order declaration line (reverse-retail, then greedy), compiled from a copy under `build/`, accepted only with the line count kept and code identical |
 | `tools/dataorder.py` | data-section order measure (`.rdata`, `.data` incl. `.bss`) |
 | `tools/rtti.py` | locator order |
-| `tools/inventory.py` | the whole-exe difference inventory: every differing byte charged to an item (paired by code, data relocations, library bytes, EH tables and content) and the root causes per area, with net/abs/items; headline `.text` size against retail; |
+| `tools/inventory.py` | the whole-exe difference inventory: every differing byte charged to an item (paired by code, data relocations, library bytes, EH tables and content) and the root causes per area, with net/abs/items; headline `.text` size against retail |
 | `tools/datacontent.py` | every initialised data symbol the matched code reaches (pinned through code relocations, then data relocations), compared with retail over its exact COFF size: content differences and wrong references |
-| `tools/iatsim.py` | predicts the import address table from link.log: pass-1 import loads sorted by DLL name with Microsoft's qsort, discarded imports removed, each DLL's null thunk last. All 14 DLLs of our exe reproduce; with retail's per-DLL pull order inside our interleave only 4 of 12 do, so the retail array differs beyond order (see Open questions) |
-| `tools/witness_scan.py` | header-count witnesses (DrawDebugStuff, BuildDeviceList, CPDTimeline, FEPGoodies::Render): current state, and the window of extra dead declarations each tolerates; the first two are periodic in the declaration count with period 64 (one declaration = one 32-id block, 2048 ids). Run `--state-only` on any merged tree before a full check (3 s per witness) |
+| `tools/iatsim.py` | predicts the import address table from link.log: pass-1 import loads sorted by DLL name with Microsoft's qsort, discarded imports removed, each DLL's null thunk last. All 14 DLLs of our exe reproduce (two of them, with ordinal imports, by count only); with retail's per-DLL pull order inside our interleave only 4 of the 12 DLLs compared by name do, so the retail array differs beyond order (see Open questions) |
+| `tools/witness_scan.py` | header-count witnesses (CGame::DrawDebugStuff, CD3DApplication::BuildDeviceList, the CPDTimeline rows, CFEPGoodies::Render, CDamageTexture::Load): current state, and the window of extra dead declarations each tolerates; the first two are periodic in the declaration count with period 64 (one declaration = one 32-id block, 2048 ids). Run `--state-only` on any merged tree before a full check (3 s per witness) |
 | `tools/alignedeq.py` | shift-aligned code equality (raw, REL32-masked, all-relocations-masked); `--breakdown` classifies the unequal relocated words by target; `--data-events` lists the constant-offset runs of `.rdata`/`.data`/`.bss` against retail, with the chain, steps and the fill curve |
 | `tools/constowner.py` | which object holds each float constant: every constant the matched code references pinned at its retail address, retail's owner from the pinned items around it, ours from the map; mismatches classed "emission" (both use it) or "missing code" (retail's owner has no use of it in our source), and names that retail keeps at two addresses with our sites by the copy they address (the third section, "one name, two retail copies"; `--sites` lists every site, `--json` writes all three). |
 
@@ -392,16 +389,16 @@ Each is labelled where it lives and removed when its question closes.
   copy folds by ICF into `CText::Shutdown` (`004f2170`, the same bytes in retail, where the two are not folded), so retail's
   was inline, and an inline destructor comes out after its first user. A function between them needed it out of line
   and `/OPT:REF` dropped it; its original is unknown, so an unreferenced `delete []` stands in. Code-neutral: every
-  object but mixermap.obj is byte-identical (Map.obj renumbers two local labels), all 5,482 of the full working tree match, `.text` size unchanged;
+  object but mixermap.obj is byte-identical (Map.obj renumbers two local labels), all 5,482 of the full working tree match (the 2026-10-16 full-tree figure, not reproducible here), `.text` size unchanged;
   mixermap's five functions are in retail's order (placement events 281 to 268 overall, partly ICF survivor reshuffle).
-- **Layout stand-ins** in source, each marked `STAND-IN (layout)` .
+- **Layout stand-ins** in source, each marked `STAND-IN (layout)`.
   - `MemoryManager.h` makes the replacement `operator new(size_t)` and `operator delete(void *)` extern inline only in the
     objects whose copy retail keeps (`COLLISIONSEEKINGTHING_CPP`; `ENGINE_CPP` and four more), `static inline` elsewhere.
     VC6 emits an extern inline replacement new/delete as a COMDAT in every object that sees it, and plain selection keeps
     the first definer: with plain `inline` and no switches the survivors move to `activereader.obj` (delete, `004010c0`) and
     `actor.obj` (new, `004010d0`) against retail's `collisionseekingthing.obj` (`00426fd0`) and `engine.obj` (`00449d40`)
     (measured). ICF cannot fold them into place either, since it folds only COMDATs of the same selection.
-    Re-measured (2026-10-16): with plain `inline` new/delete and no switches, all 5,482 functions of the full working tree
+    Re-measured (2026-10-16): with plain `inline` new/delete and no switches, all 5,482 functions of the full working tree (the 2026-10-16 full-tree figure, not reproducible here)
     still match, but the survivors are the first definers again (delete `activereader.obj` `004010c0`, new `actor.obj`
     `004010d0`); the fold work does not change it, so the switches and the six non-PCH objects stay.
 - **PENDING, not committed: unreferenced `.bss` placeholders.** See the candidate list below. They are applied last,
@@ -433,9 +430,14 @@ Not yet decided: each keeps one thing out of retail's position to hold another t
     ParticleManager, ParticleSet, PauseMenu, ResourceAccumulator, SimpleBuilding, System, VertexShader, console,
     d3dapp, d3dutil, debris, debugmarker, dxutil, game, ltshell, pcsoundmanager, renderinfo, renderqueue, text,
     vbuftexture.
-  - Objects built without the PCH (`config/no-pch.txt`) follow a name hash instead: BattleEngineDataManager,
-    DXMeshRenderer, InitThing, MCMech, IScript, ScriptObjectCode, PCMusicStream, PCPlatform, SoundManager,
-    collisionseekingthing, engine, mesh.
+  - Objects built without the PCH follow a name hash instead. `config/no-pch.txt` lists 15 sources, which `decomp.py`'s
+    `flags_for` reads: BattleEngineDataManager, DXMeshRenderer, InitThing, MCMech and ScriptObjectCode are not on it, so
+    the tool builds them with the PCH. The 15 are AsmInstruction.cpp, DataType.cpp, EventFunction.cpp, IScript.cpp,
+    PCMusicStream.cpp, PCPlatform.cpp, SoundManager.cpp, cframetimer.cpp, collisionseekingthing.cpp, engine.cpp, mesh.cpp,
+    adpcm.c, splinebasis.c, pausecommons.c and avirecorder.c. Each has a row in `config/link-objects.txt`; splinebasis.c is
+    one that this tree leaves out. adpcm.c and splinebasis.c define only initialised tables, and cframetimer.cpp, DataType.cpp,
+    EventFunction.cpp, engine.cpp and avirecorder.c define no data in their own source files, so those seven produce no
+    .bss-family object of their own. The other eight define data of their own in their sources.
   - Open question: these are two systematic emission rules that our C1XX/C2 8966 does not follow from any source form
     tried. Retail's Rich header records its game objects at the same build (11, 8966), so the likelier cause is a
     compile option or input difference (how the PCH was created, include structure, or an option not yet tried), not
@@ -472,13 +474,11 @@ Not yet decided: each keeps one thing out of retail's position to hold another t
   | `iscript.obj` | 36 | After `gEventArg`. |
   | `SimpleBuilding.obj` | 32 | 16 after each of `ID_FMATRIX2` and `ZERO_FVECTOR2`. |
 
-Measurements: main;
-
 ## Convergence counters (whole-array, tracked, not gated)
 
 These depend on every record of an array matching retail's, so a single correct commit can move them either way; they
 measure how close the link is, and no commit is judged by them alone. Values:
-- **ICF fold survivors** (`tools/icfsim.py --report`): 246 of 246 fold groups predicted; (a) size keys 0 of 4,608 differ
+- **ICF fold survivors** (`tools/icfsim.py --report`): 246 of 246 fold groups predicted (an undated run; the 2026-10-16 status under Open questions counts 249); (a) size keys 0 of 4,608 differ
   (was 1 before the Load composite); (b) emission 0 extra, 0 missing; (c) library records 2,817 from 285 members, identity
   with retail's library builds not yet known. Annotated functions at the retail address in `linkcmp` (a whole-array hash of
   these survivors) read 5 of 4,975; 4,339 in retail's order.
@@ -508,14 +508,13 @@ measure how close the link is, and no commit is judged by them alone. Values:
 
 - **About 134 C++ objects are missing from our link.** The Rich header records 464 C++ and 3 C game objects at build
   8966; our Rich header counts 330 C++ objects and 3 C ones (the three rebuilt C objects, Proven mechanisms). The
-  missing ones carry no code, no initializers and no `__FILE__` users: every source path retail's data names (151
-  `.cpp`/`.c` and 11 header names) is in `src/` and in our image. So they are not recoverable from
-  the matched code; their names would explain the `.bss` gaps and the pulled-import count (242 vs 253).
+  missing ones carry no code, no initializers and no `__FILE__` users: every source path retail's data names, except the five the README leaves out (151 `.cpp`/`.c` and 11 header names), is in `src/` and in our image. So they are not recoverable from
+  the matched code; their names would explain the `.bss` gaps and the pulled-import count (239 vs 253).
   Nor does the image hold anything else of theirs: RTTI type names (667)
-  and vtables (724 complete-object locators) are the same sets in retail and ours, every game initializer in retail's
-  `.CRT$XCU` table (706; the other 8 are the C runtime's) has a counterpart in `src/`, so none of them includes the
+  and vtables (734 complete-object locators, the survey count below) are the same sets in retail and ours, every game initializer in retail's
+  `.CRT$XCU` table (698 of its 706 slots; the other 8 are the C runtime's) has a counterpart in `src/`, so none of them includes the
   headers that bring the per-object maths constants, and `.data`/`.rdata` show no span retail holds that our objects do
-  not. Only `.bss` does: 34 objects' spans are larger in retail (36,952 bytes; the largest are after DXWater, 18,028,
+  not. Only `.bss` does: 34 objects' spans are larger in retail (36,952 bytes, a span total not reconciled with the step and concession totals above; the largest are after DXWater, 18,028,
   before the C runtime; TokenArchive, 8,200; PolyBucket, 6,116; PCPlatform, 1,408). A missing object holding only
   unreferenced `.bss` would look the same as those, so the image cannot tell them from the placeholder concessions,
   which stay. The missing objects are therefore empty as far as the image shows: stubs, header-only files, or files
@@ -528,7 +527,7 @@ measure how close the link is, and no commit is judged by them alone. Values:
   in `#ifdef`/`#else`/`#endif` reorders FrontEnd's `??_R1`..`??_R4` records although the same tokens reach it, and an
   empty first branch does as well; nine blank lines or stripped comments do not. A `_CPP` guard therefore costs RTTI
   order in every includer.
-  InitThing (on the PCH) has its ten complete-object locators in retail's order in neither build:
+  InitThing (on the PCH) has eleven complete-object locators (its base class InitThing and ten derived classes, Start among them); the three lists below leave Start out, and neither build puts them in retail's order:
   retail SphereTrigger, Hazard, Cutscene, Feature, Wall, Squad, Spawner, Tree, Unit, InitThing; without the PCH Tree,
   Hazard, Feature, Unit, SphereTrigger, Cutscene, Wall, Squad, Spawner, InitThing; with it Spawner, Unit, Tree,
   SphereTrigger, Cutscene, Wall, Squad, Hazard, Feature, InitThing.
@@ -542,11 +541,10 @@ measure how close the link is, and no commit is judged by them alone. Values:
     moves it. A cast in an inline body after F was declared, or `class F;` after the classes, does not.
   - Pad structs shift the start: with 0 or 1 pads the first class comes first and the rest descend; with 2 to 12 pads
     the order is pure descending.
-  - From about 14 classes up, chained buckets show (at 20 classes, records 15 apart share a bucket, newest first). No (c
-    ± t) mod M model fits all cases, which is consistent with buckets keyed by where each record was allocated, with
+  - From about 14 classes up, chained buckets show (at 20 classes, records 15 apart share a bucket, newest first). No modular rule of the form (constant ± term) mod bucket count fits all cases, which is consistent with buckets keyed by where each record was allocated, with
     allocation following creation.
-  - InitThing reaches retail's order. Forward-declaring its ten derived classes right after `Common.h`, in the reverse
-    of retail's order (Unit, Tree, Spawner, Squad, Wall, Feature, Cutscene, Hazard, SphereTrigger, Start), gives
+  - InitThing reaches retail's order. Forward-declaring its ten derived classes right after `common.h`, in the reverse
+    of retail's order (Unit, Tree, Spawner, Squad, Wall, Feature, Cutscene, Hazard, SphereTrigger, Start; Start is a derived class of its own, not the base InitThing), gives
     retail's 11 locators exactly, with all 24 functions byte-identical when the file's line count is kept. No header we
     have or Stuart released mentions most of them earlier, so retail's creation order implies earlier mentions in a
     header `InitThing.h` includes before its definitions (or in the precompiled header).
@@ -569,7 +567,7 @@ measure how close the link is, and no commit is judged by them alone. Values:
     the near-misses are held for the end stage, after header reconstruction has had the chance to make some of them
     natural or unnecessary.
   So RTTI order is header-content evidence, as the `.bss` order is (both follow creation), not a necessary concession.
-  It is 97% of `.rdata` order churn.
+  It is 96% of the same `.rdata` order churn.
 - **(11, 8047) 9 versus 10.** Retail has ten C++ CRT members; we link nine (ehvecctr, ehvecdtr, frame, handler, hooks, trnsctrl, typinfo, unhandld, validate). Adding `new.obj` or `delete.obj` makes ten with no code (their COMDATs are dropped) and one multiply-defined line, but retail's `.text` has neither's bytes (0 and 1 coincidental hit) and the game defines operator new/delete itself, so nothing would pull them: left open, no Rich-only pull.
 - **Import `.idata$5` input.** Within a DLL the IAT is Microsoft-`qsort`ed pass-1 load order, but our pull order puts
   only 20 of KERNEL32's 112 entries in retail's order, and USER32, GDI32,
@@ -608,9 +606,9 @@ measure how close the link is, and no commit is judged by them alone. Values:
     its `.cpp`. The PCController and WorldPhysicsManager moves each shift a witness alone (`CGame::DrawDebugStuff`,
     `CD3DApplication::BuildDeviceList`); landed together, all witnesses pass at k = 0.
     An earlier `PCCONTROLLER_CPP` guard worked too, but its `#ifdef`/`#else` directives moved the RTTI walk in four
-    objects (reverted ).
+    objects (reverted).
   - Pending: Cockpit's render overrides after the class need three more declarations
-    (DrawDebugStuff at k >= 2, BuildDeviceList at k >= 3); DXImposter's destructor move is neutral; three of Stuart's
+    (DrawDebugStuff at k >= 2, BuildDeviceList at k >= 3; k is the number of dead declarations inserted before the witness); DXImposter's destructor move is neutral; three of Stuart's
     `ltshell.h` declarations balance the pair. Retail's survivors `00405910..00405930` are BattleEngine.obj's copies of
     CCockpit's overrides, in non-declaration order; the in-class form in that order changes `CPDTimeline::Unknown10`
     (`004c2640`).
@@ -624,7 +622,7 @@ measure how close the link is, and no commit is judged by them alone. Values:
   - The balancing pool: 25 genuine bodiless Stuart declarations our common headers lack. Some sit under `#ifdef` and
     cannot be used, since a directive moves the RTTI walk.
   Which witnesses need which in-class bodies may be the clue to the original header layout.
-- **NvTriStrip's release.** Retail links NVIDIA's prebuilt `nvtristrip.lib`: its two objects carry comp.id (49, 9044), Visual C++ 6 with the Processor Pack, which retail's Rich header lists twice (the (25, 9466) pair is something else). The residual is `NvStripifier::RemoveSmallStrips` (retail 654 bytes, this release 672): retail's exact release is not found. A C3-engine copy has retail's `RemoveSmallStrips` but differs in `FindAllStrips` and three `std::set` instances; both functions sit in the same member (`nvtristripobjects.obj`), so the two libraries cannot be combined member by member.
+- **NvTriStrip's release.** Retail links NVIDIA's prebuilt library (the pinned `NvTriStrip-ut2003-engine.lib`): its two objects carry comp.id (49, 9044), Visual C++ 6 with the Processor Pack, which retail's Rich header lists twice (the (25, 9466) pair is something else). The residual is `NvStripifier::RemoveSmallStrips` (retail 654 bytes, this release 672): retail's exact release is not found. A copy from a different engine's files has retail's `RemoveSmallStrips` but differs in `FindAllStrips` and three `std::set` instances; both functions sit in the same member (`nvtristripobjects.obj`), so the two libraries cannot be combined member by member.
 - **Which copy survives for `~CLine` and `??_GCLine`.** Not an emission question: BattleEngine.obj defines and selects both, and they fold with the `CCylinder` copies there, while retail's survivors are collisionseekingthing's `CSphere` copies (`00426340`, `00426360`). It is fold order, part of the ICF array convergence above.
 - **Fold survivors: convergence status (measured 2026-10-16).** LINK makes 249 fold groups; retail's survivor is known
   (every name in the group at one retail address) for 195. As measured, 103 of those 195 keep their survivor in
@@ -657,7 +655,7 @@ measure how close the link is, and no commit is judged by them alone. Values:
     probably one question.
   - One spelling or the other, not yet decided (both sides use the value, written as a division on one side and a
     product on the other; Stuart's source has neither file): Animal's 1/32767 against MeshCollisionVolume, MeshPart,
-    PolyBucket and StaticShadows; BattleEngine's 2.55 against Carver and DXCockpit; FEPBriefing's 1/480 and 1/640 against
+    PolyBucket and StaticShadows; FEPBriefing's 1/480 and 1/640 against
     DXSpriteRenderer; gcgamut's 1/60 against DXLandscape and MessageLog.
   - Names retail keeps at two addresses whose sites still share one name of ours (`constowner.py`, "one name, two retail
     copies"): 68 (`005dbe60`, Hud), 160 (`005db490`, FEPControls), 1/64 (`005dbb4c`, FrontEnd and Hud) and 1/127

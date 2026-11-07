@@ -1,7 +1,7 @@
 # Divergences from Stuart's source
 
 Status: reference
-Last updated: 2026-11-06
+Last updated: 2026-11-07
 Summary: Where the retail build differs from Stuart Gillam's published source, by file and address.
 
 Each entry names the retail evidence that forced it.
@@ -48,7 +48,7 @@ Each entry names the retail evidence that forced it.
   (`0041c160`): the top bytes of the first two counters hold other data (the accessors at `004218f0`..`00421940`),
   and `UpdateThingsKilled` logs the masked total. `UpdateGoodieStates` reads the first goodie's state through
   `GetGoodieState(0)`, one inline expansion more than the macro; retail's inlining cutoff proves one extra
-  expansion before goodie 72's rule, and this is the one place found for it (see the findings above). The goodie
+  expansion before goodie 72's rule, and this is the one place found for it (see the inline-budget entries in compiler-findings.md). The goodie
   rules themselves are Stuart's, all 300.
 - `Career.cpp` save path: the PC build compiles Stuart's console branch (buffer, `SWORD` version stamp
   `CAREER_VERSION + (sizeof(CCareer) << 4)`) with `CAREER_VERSION` 17, not 9 (`00623e24`). `Save` (`00421350`) no
@@ -65,12 +65,22 @@ Each entry names the retail evidence that forced it.
   vsync flag, the tweaks `LANDSCAPE_MAXLEVELS_USER`, `USER_TEXTURE_RES_LOSS_SHIFT` and `USER_TEXTURE_ALLOW_32_BIT`,
   the current device's multisample type, flip-speakers, hardware sound, sound rate, sound device, 3D sound method
   (all `CLIPARAMS` fields) and two landscape-detail bytes. The tweaks' names are their own constructor strings.
-  `d3dapp.h` is Stuart's framework header in its Direct3D 9 form, with `GetCurrentDevice()`.
-- `ltshell.cpp` (in progress; Stuart's Direct3D 8 file ported to the retail Direct3D 9 shell): the functions not yet ported sit under `NOT_YET_RECONSTRUCTED`. Retail `WinMain` (`00512130`) is Stuart's with `MainLoop` and `SetupSystemMessageHandler` inlined, plus the PC port's additions: the version from the executable's version resource (the numbers `-getversion` prints), turning off the sticky/toggle/filter-key shortcuts (`ExitCode` restores them), a 32 MB heap instead of 96 MB, and loading `defaultoptions.bea` with `CAREER.Load(buffer, false)` followed by `CAREER.Blank()`: at startup only the key bindings, the PC options and the career fields `Blank` keeps (the volumes, invert-Y, vibration, controller configuration and the +0x249c pair) survive from that file. Its allocation is on line 741 (`#line`; the retail file's layout is not Stuart's). The exception handler compiles only its `fopen` of `OnslaughtException.txt` (`00512040`); `ExitCode` (`00512070`) also frees the patch cache and shuts down the two `CReconnectInterface` objects. Stuart's inline device-state helpers are out of line in retail (`00513820`..`00514030`), reached through `LT.GetDevice()` whatever the receiver, with retail additions: sampler states (`SSS`, which drops the LOD bias, refuses anisotropic filtering the card lacks and clamps its level, and shares the texture-stage cache), a cull-mode swap in `SRS`/`ForceRS` for mirrored passes (`0089d680`), `OLD_SCHOOL_ALPHA_REF` (the alpha reference repeated in the next byte), the colour-op choice under `USE_MODULATE_2X`, table or vertex fog by the card's caps, software vertex processing, vertex-shader and FVF caches (`mSoftwareVertexProcessing` `00889070` is Stuart's `mLastVertexShader` slot), `D3DXAssembleShader` pixel shaders, and `xKeyOnce` keeping a key readable for the rest of the frame (`sKeysRead`). `InvalidateAllStates` (`00513600`) resets those three scalar caches before the table fills, where Stuart's single reset came last. VC6 sinks the three stores below the `rep stos` fills, and only that order loads the fill value into `eax` before the first count.
+- `d3dapp.h` is Microsoft's DirectX SDK sample application framework header, as carried in Stuart Gillam's release, in its Direct3D 9 form, with `GetCurrentDevice()`.
+- `ltshell.cpp` (Stuart's Direct3D 8 file ported to the retail Direct3D 9 shell): the functions not yet ported sit under `NOT_YET_RECONSTRUCTED`. Retail `WinMain` (`00512130`) is Stuart's with `MainLoop` and `SetupSystemMessageHandler` inlined, plus the PC port's additions: the version from the executable's version resource (the numbers `-getversion` prints), turning off the sticky/toggle/filter-key shortcuts (`ExitCode` restores them), a 32 MB heap instead of 96 MB, and loading `defaultoptions.bea` with `CAREER.Load(buffer, false)` followed by `CAREER.Blank()`: at startup only the key bindings, the PC options and the career fields `Blank` keeps (the volumes, invert-Y, vibration, controller configuration and the +0x249c pair) survive from that file. Its allocation is on line 741 (`#line`; the retail file's layout is not Stuart's). The exception handler compiles only its `fopen` of `OnslaughtException.txt` (`00512040`); `ExitCode` (`00512070`) also frees the patch cache and shuts down the two `CReconnectInterface` objects.
+- `ltshell.cpp`, device state: Stuart's inline helpers are out of line in retail (`00513820`..`00514030`), reached through
+  `LT.GetDevice()` whatever the receiver, with retail additions: sampler states (`SSS`, which drops the LOD bias,
+  refuses anisotropic filtering the card lacks and clamps its level, and shares the texture-stage cache), a
+  cull-mode swap in `SRS`/`ForceRS` for mirrored passes (`0089d680`), `OLD_SCHOOL_ALPHA_REF` (the alpha reference
+  repeated in the next byte), the colour-op choice under `USE_MODULATE_2X`, table or vertex fog by the card's
+  caps, software vertex processing, vertex-shader and FVF caches (`mSoftwareVertexProcessing` `00889070` is
+  Stuart's `mLastVertexShader` slot), `D3DXAssembleShader` pixel shaders, and `xKeyOnce` keeping a key readable for
+  the rest of the frame (`sKeysRead`). `InvalidateAllStates` (`00513600`) resets those three scalar caches before
+  the table fills, where Stuart's single reset came last. VC6 sinks the three stores below the `rep stos` fills, and
+  only that order loads the fill value into `eax` before the first count.
 - `Controller.cpp` is Stuart's file rebuilt around the PC port's controls (its allocation on retail line 967,
   `#line`). `SControlBinding` holds two 12-byte inputs (pad, push type, key, display character); each player reads
   the input with its own number and in a single-player game player 1 reads both (`0042e2c0`). New push types:
-  `KEY_RELEASE` (10), four mouse axes (11 to 14; 13 and 14 are ignored for a player whose `gMouseAxisLocked` is set, `0066e8cc`),
+  `KEY_RELEASE` (10), four mouse axes (11 and 12: plus and minus, as 13 and 14 without the lock; 13 and 14: plus and minus, ignored for a player whose `gMouseAxisLocked` is set, `0066e8cc`),
   mouse button held (15), and mouse button or wheel once/released (16, 17). A held digital control sends ±1 by
   direction (left, up and forward are -1); everything else sends 1 where Stuart sent 0. The mouse axes are the
   cursor's distance from the window's centre times 0.0043333 and the sensitivity (`gMouseSensitivity` `006254f4`,
@@ -111,7 +121,7 @@ Each entry names the retail evidence that forced it.
   `CONTROL_BINDINGS` (`008892d8`, built by `00514210`): 47 bindings the career saves, the first sixteen
   configurable (mouse yaw and pitch, WASD, Tab cloak, space, mouse buttons for the gun pod, weapon and zoom, left
   Shift for the landing jets), then fixed keys for the menus, cutscenes, pause and the free camera, ended by an
-  entry with id -1. Push types 13 to 17 are the mouse (axes plus and minus; button on, once, released). The
+  entry with id -1. Push types 13 and 14 are the mouse axes (plus and minus), and 15 to 17 the mouse buttons (button on, once, released); 11 and 12 are the same axes without the lock (see `Controller.cpp`). The
   analogue readers return 0 for a pad beyond `mJoypads` (the right stick's Y also when the pad has no Rz axis);
   the hat switch (`GetJoyPovX`/`Y`, new slots 13 and 14) is the sine and negated cosine of its angle; key reads
   take no pad number and go straight to LT (`xKeyOnce`, the new `GetKeyRelease` through `xKeyUp`) or
@@ -121,7 +131,7 @@ Each entry names the retail evidence that forced it.
   that reaches it is known.
 - `FEPSaveGame.cpp` is Stuart's file (its `new` on retail line 535, `#line`). The PC build skips `Process` on an
   inactive page (`00464744`), checks the overwrite's delete and recovers through the virtual keyboard
-  (`004649a0`), adds a format question (9) where Stuart whinged about an unformatted card (`00464d1d`..`00464d42`),
+  (`004649a0`), adds a format question (9) where Stuart's release handles an unformatted card (`00464d1d`..`00464d42`),
   returns to `FEP_MAIN` wherever Stuart went to `FEP_DEVSELECT`, saves through `SaveAndMarkInProgress` (`004213c0`)
   with a buttonless 60-tick box and moves on at once (`004650e8`), and shows text `0xd6` after a save started from
   the options page (`gSaveFromOptions`, `006799d0`). `IsCheatActive` (`00465490`) is true under `-autoconfigtest`
@@ -139,7 +149,7 @@ Each entry names the retail evidence that forced it.
 - `FEPSaveGame.cpp`: `CreateSave` compares save names with `_wcsicmp` (`00464ee6` calls `005d04ec`, which folds
   `A`..`Z`), not Stuart's `wcscmp`. The earlier match took `005d04ec` as `wcscmp` because no other object called
   either; FEPVirtualKeyboard's real `wcscmp` (`0055f2e8`) exposed the conflict.
-- `MeshCollisionVolume.cpp` and `MeshPose.cpp` were absent from the earlier pinned release and initially reconstructed from bytes. Stuart's October14 source includes `MeshPose.cpp`; EvaluatePose now follows that source as recorded above. The reconstruction uses
+- `MeshCollisionVolume.cpp` and `MeshPose.cpp` were absent from the earlier pinned release and initially reconstructed from bytes. Stuart's source of 2026-10-14 includes `MeshPose.cpp`; EvaluatePose now follows that source; the caller that resolves to its body is recorded in compiler-findings.md, under "Emitter and effect lookups retain part pointers". The reconstruction uses
   new `GeneralVolume.h` (the abstract volume, vtable `005d892c`: slots 1..4 collide with a mesh, cylinder, sphere
   and line, slot 5 double-dispatches), `Sphere.h` (0x1c bytes), `MeshCollisionVolume.h` (0x28 bytes) and
   `cylinder.h`. The pose cache (`004b4ab0`..`004b512f`) is its own object between MeshPart.obj and
@@ -170,60 +180,60 @@ Each entry names the retail evidence that forced it.
   particle time at `00672fd0` is the event manager's clock (`EVENT_MANAGER` `00672fc8`, `mTime` +8).
 - `component.h` (CComponent, CGillMHead, CTentacle) is rebuilt from its vtables; with `SpawnCharacter` every retail
   function of WorldPhysicsManager.obj has been attempted.
-- `MenuOptionsList.cpp` is not in Stuart's release; it is rebuilt from its bytes (11 of 15, both vtables). The list
+- `MenuOptionsList.cpp` is not in Stuart's release; it is rebuilt from its bytes, with both vtables. The list
   matches items by their text id (+0x08, `004a4ded`); its destructor deletes the items, releases the blank texture,
   then destroys the set (`004a46c5`..`004a470f`).
-- `unit.cpp` is not in Stuart's release; it is rebuilt from its bytes (96 so far). `CUnit`'s members are laid out from
+- `Unit.cpp` is not in Stuart's release; it is rebuilt from its bytes. `CUnit`'s members are laid out from
   its constructor (`004f7e90`), named as Stuart's `CBattleEngine` reads them (`mLife` +0xf8, `mAllegiance` +0x138,
   `mVulnerable` +0x15c, `mInfinateEnergy` +0x160) and by role elsewhere; the deploy state is +0x244 (3 deploying,
   4 deployed, 5 undeploying). `IsTargetAlligence` (`004fd3d0`) and `GetLaunchPosition` (`004fc3c0`) carry Stuart's
   names and signatures. A loop written with `for` was not inlined where the `while` form is (`Remove`, `004fd040`).
-- `PauseMenu.cpp` (100 of 110, all 23 vtables, the 4,201-byte constructor with every page and item) and
-  `FrontEndThing.cpp` (13 of 13) are not in Stuart's release; they are rebuilt from their bytes. `CGameMenu`'s only
+- `PauseMenu.cpp` (all 23 vtables, the 4,201-byte constructor with every page and item) and
+  `FrontEndThing.cpp` are not in Stuart's release; they are rebuilt from their bytes. `CGameMenu`'s only
   function is its constructor (`004d0e40`), inside PauseMenu.obj. `CRenderData` has a dword before `mRTID` and ends
   with a count its constructor sets to 1 (+0x424). `CMenuItem::mText` is signed; `CPauseMenu` takes a `bool`.
-- `FEPMultiplayerStart.cpp` is not in Stuart's release; it is rebuilt from its bytes (8 of 9 and its leading maths
+- `FEPMultiplayerStart.cpp` is not in Stuart's release; it is rebuilt from its bytes (its leading maths
   pair, whose ownership Init proves by copying this object's `ID_FMATRIX`, `0089bbf0`). It and CFEPBEConfig use the
   front end's meshes 0 and 1 (`0089d900`, `0089d904`). `SFrontEndThingInit::mMeshName` is 200 characters.
   `CConfirmMenuOptionsList`'s destructor is implicit (retail's `~CSimpleGameMenu` calls `~CMenuOptionsList`,
   `004d17e0`).
-- `FEPBEConfig.cpp` is not in Stuart's release; it is rebuilt from its bytes (17 of 23 and its leading pair). The
+- `FEPBEConfig.cpp` is not in Stuart's release; it is rebuilt from its bytes (its leading pair). The
   configuration levels (`SBEConfigLevel`) carry the wingman flags at +4, +8, +0xc (Tara, Billy, Jason).
-- `FEPWingmen.cpp` is not in Stuart's release; it is rebuilt from its bytes (8 of 10 and its leading pair); it
+- `FEPWingmen.cpp` is not in Stuart's release; it is rebuilt from its bytes (its leading pair); it
   shares FEPBEConfig's level format and frees entries through `0044fdf0`. `CFrontEndData::Shutdown` expands
   Stuart's `PARTICLE_MANAGER.Shutdown()` and `PARTICLE_SET.Shutdown()`.
-- `eventmanager.cpp` and `scheduledevent.cpp` are Stuart's files unchanged (eventmanager.obj 19 of 19, with the
+- `eventmanager.cpp` and `scheduledevent.cpp` are Stuart's files unchanged (eventmanager.obj, with the
   `CScheduledEvent` constructor and reader destructor it carries). Their overflow list needs `OPtrSet.h`,
   `flexarray.h`/`.cpp` and `OPtrSet.cpp`, which are not in his release and are rebuilt from their bytes:
   `OPtrSet<T>` is a thin template over `GenericOPtrSet` (its own object, `004241a0`..`0042435b`, as `SPtrSet` is over
   `GenericSPtrSet`), itself a `CFlexArray` (flexarray.cpp, `00465530`..`004655cf`). `CFlexArray::DEFAULT_SIZE` (16)
   is a static const the other objects load from memory (`005db5f8`).
 - The battle engine is Stuart's: `BattleEngine.h` is his full header (an offsetof probe matches every retail anchor;
-  `sizeof` is 0x63c, the factory's allocation at `004bf0c7`), `BattleEngineConfigurations.cpp` matches 4 of 4 and
+  `sizeof` is 0x63c, the factory's allocation at `004bf0c7`), `BattleEngineConfigurations.cpp` matches retail in full and
   `BattleEngineJetPart.cpp` is seeded from his file. `weapon.h`, `Equipment.h` and `Line.h` are rebuilt (`CWeapon`'s
   accessors are inline in retail). `UBattleEngineDataManager::sData` (`006602a0`) is initialized in
   BattleEngineConfigurations.obj's static initializers (`0040f3d0`..`0040f51e`), not in the data manager's object.
-- `Player.cpp`, `Player.h` and `Camera.h` are Stuart's files (Player.obj 18 of 19; his CPlayer is exactly retail's 0x50
+- `Player.cpp`, `player.h` and `Camera.h` are Stuart's files (Player.obj; his CPlayer is exactly retail's 0x50
   bytes). Retail's `ReceiveButtonAction` inverts the pitch from the career's options instead of the controller's
   flag: `mInvertYAxis[mNumber-1]` when the walker is on the ground, otherwise a second PC option at +0x249c
   (`mInvertJetYAxis`, name open; `004d31d3`..`004d31fa`). `ConfigurationUp`/`Down` are empty and folded with
   `DebugTrace` (`0040c640`). `thing.h` includes `"monitor.h"` as Stuart spelled it: the path in its inlines' `__FILE__`
   is the retail string (`0062551c`).
 - `Camera.cpp` is seeded from Stuart's file; the current score owns its progress, and the declaration
-  experiments above record the remaining source-context question. `CInterpolatedCamera::Mirror`
+  experiments in matching-techniques.md (its shared-declarations entries) record the remaining source-context question. `CInterpolatedCamera::Mirror`
   is unused and absent from retail; `0041b040`/`0041b060` are that class's inline `GetOrientation` and `GetZoom`.
   `CBSpline` has a virtual destructor (RTTI `005d8e00`). `FVector::operator+=` returns `void` and adds with `+=`
   (its out-of-line copy `0041ad10` matches; Stuart's own callers never chain it). `FMatrix::Normalise` is Stuart's
   re-orthonormalisation (`0041af95`..`0041afdb`).
 - `BattleEngine.cpp` is seeded from Stuart's file; the current score table owns its matching progress. `CUnit`'s slots 78, 79, 88 and 101 are his
   `GetMaxLife`, `GetThreat`, `GetEmitter` and `ConfirmedKill`; `CInfluenceMap` is his `INFLUENCEMAP`
-  (`0067a748`, InfluenceMap.h). The September 30 header recheck above additionally places slot 105
+  (`0067a748`, InfluenceMap.h). The 2026-09-30 header reconstruction (compiler-findings.md, "Released-source calls exposed unfinished header reconstruction") additionally places slot 105
   OnScanner, Feature slot 71 IsLockable, and the formerly declaration-only auto-aim/weapon accessors.
   GetTargetablePos uses this reconstruction's established pointer virtual throughout; the source's
-  reference call spelling must not bind to a separate nonvirtual method. The October 1 UpdateAutoAim
+  reference call spelling must not bind to a separate nonvirtual method. The 2026-10-01 UpdateAutoAim
   reconstruction names the launch vector before the matrix product: this recovers retail's magnitude
   accumulation order and completes the entire section/relocation match, without changing shared maths.
-- `InitThing.cpp` and `InitThing.h` are Stuart's files (InitThing.obj 20 of 20). His whole .cpp body after
+- `InitThing.cpp` and `InitThing.h` are Stuart's files (InitThing.obj). His whole .cpp body after
   `SpawnInitThing` is `#ifdef EDITORBUILD`, so retail's Copy/Load members are his header's inlines, emitted after
   `SpawnInitThing` (CInitThing's own in BattleEngine.obj, CStartInitThing's in game.obj). `SpawnInitThing`'s
   allocations carry his line numbers (15..63), and its switch gives the object ids oids.h now holds (Tree 7, Spawner
@@ -240,20 +250,20 @@ Each entry names the retail evidence that forced it.
   otherwise `SaveDefaultOptions` saves the career through the save page when a slot is in use and writes the career
   and options to `defaultoptions.bea` (retail line 250; `WriteDefaultOptionsFile` `0051f680`). Entering it from a
   main menu keeps the volumes, both players' vibration and controller configuration, and the screen position.
-- `WorldMeshList.cpp` is not in Stuart's release; it is rebuilt from its bytes (8 of 8). The table name
+- `WorldMeshList.cpp` is not in Stuart's release; it is rebuilt from its bytes. The table name
   `CWorld__SpawnInitialThings` (`0050dcb0`) is wrong: the function creates, initialises and shuts down one unit of
   each type not yet used, to load its resources.
-- `world.cpp` (23 of 32) and `rtmesh.cpp` (17 of 22) are not in Stuart's release; they are rebuilt from their
+- `world.cpp` and `rtmesh.cpp` are not in Stuart's release; they are rebuilt from their
   bytes, with the `CRenderThing` and `CRTMesh` vtables. Open: `CWorld`'s clear (`0050ada0`) calls a non-virtual
   scalar deleting destructor (`0050d680`) and `GenericSPtrSet::First` out of line where our build inlines both.
-- `WorldPhysicsManager.cpp` (26 so far) is not in Stuart's release: the definition registries and destructors,
+- `WorldPhysicsManager.cpp` is not in Stuart's release: the definition registries and destructors,
   resolvers, name lookups, `Add*ByName` and `MapMountName`; `WorldPhysicsManager.h` holds the definition classes
   (`CUnitData` 0x1ac) and `EUnitBehaviour` 0..25 from the physics-script keyword classes. `BattleEngineDataManager.h`
   is Stuart's, line-exact (its `new` lines 263 and 310).
 - `FEPGoodies.cpp` is seeded from Stuart's file: his 232-entry goodie table matches retail's static
   initializer (`0045ac30`, 6,963 bytes) entry for entry through `text.stf`'s ids, and his class fits the 0x1dc
-  layout exactly. The October 1 `GetMethod` match uses the existing direct PC text lookup rather than
-  its forwarding wrapper; both emitted targets are the same. Render remains unmatched.
+  layout exactly. The 2026-10-01 `GetMethod` match uses the existing direct PC text lookup rather than
+  its forwarding wrapper; both emitted targets are the same. `CFEPGoodies::Render` has since matched.
 - `game.cpp` `RestartLoopRunLevel` (`0046dc30`): retail logs the post-load memory dump Stuart commented out
   (`0046dd37`), moves the playable-demo controls screen after `MEM_MANAGER.Cleanup` (`0046df25`) and keeps
   Stuart's Xbox `SetLoadingRange(100, 100)` there, flushes the controller once more after the wait (`0046e021`),

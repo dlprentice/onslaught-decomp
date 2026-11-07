@@ -19,14 +19,16 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 
 ## Related projects
 
-- [onslaught-ce](https://github.com/dlprentice/onslaught-ce): Onslaught CE, the native Linux and Windows port built
-  from this decompilation; download it here (bring your own copy of the game).
+- [onslaught-ce](https://github.com/dlprentice/onslaught-ce): Onslaught CE, the native Linux and Windows port, built
+  from Stuart Gillam's GPL source, this decompilation and a platform layer; download it here (bring your own copy of the
+  game).
 - [onslaught-godot](https://github.com/dlprentice/onslaught-godot): the Godot rebuild of the game (a proof of concept,
   not yet a playable release).
 - [onslaught-preservation](https://github.com/dlprentice/onslaught-preservation): documentation of the game's
   formats, saves, mechanics, levels and engine.
 - [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor): the companion app for careers,
-  saves, settings and lore (to be renamed onslaught-companion).
+  saves, settings and lore (to be renamed onslaught-companion; its player capabilities move into Onslaught CE, and the
+  separate app is phased out after verified replacement).
 - [stuart73/Onslaught](https://github.com/stuart73/Onslaught): Stuart Gillam's GPL release of the game's source,
   which `src/` starts from.
 
@@ -36,10 +38,10 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | --- | --- |
 | `src/` | the game's C++: Stuart's release, the PC build's changes, and the reconstructed rest. Each function carries a `// FUNCTION: 0xADDRESS` annotation naming its retail address. |
 | `linklib/` | the link's provisional, link-only pieces, labelled as such; never part of the score |
-| `config/` | the compiler flags, the SHA-256 pins of every input, the function table, the link order ([config/README.md](config/README.md)) |
+| `config/` | the compiler flags, the SHA-256 pins of every input but the executable (its pin is in `tools/decomp.py`), the function table, the link order ([config/README.md](config/README.md)) |
 | `tools/` | the matching check, the linker and link comparison, the whole-executable inventory and data tools ([tools/README.md](tools/README.md)) |
 | `notes/` | the matching knowledge: the toolchain, compiler behaviour, techniques, divergences from Stuart's source and the link ([notes/README.md](notes/README.md)) |
-| `docs/SCORE.md` | the score, the matched functions and the functions this tree leaves out, rewritten by `tools/decomp.py score` |
+| `docs/SCORE.md` | the score block (the summary and the matched functions), rewritten by `tools/decomp.py score`; the list of functions this tree leaves out sits outside that block |
 | `docs/check/` | the check this tree's score comes from: a summary of its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |
 | `THIRD-PARTY.md` | the third-party material in `src/`, and what is left out |
 | `CONTRIBUTING.md`, `SECURITY.md`, `.github/` | how to contribute and where each kind of work goes, how to report a security problem, and the issue forms and pull request template |
@@ -57,7 +59,8 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   read your own copy of the game at run time and check it by its hash first. The PC build's hard-coded strings
   (`src/PCText.cpp`, the credits and front-end text) are in the source because the match needs them.
 - It contains no part of the toolchain: no Visual C++ binaries, headers or libraries and no DirectX SDK binaries,
-  headers or libraries, only the SHA-256 pins that say which ones the match needs.
+  headers or libraries (except the sample-framework pair in the next bullet), only the SHA-256 pins that say which ones
+  the match needs.
 - Of Microsoft's DirectX sample code, it keeps exactly one part. `src/d3dapp.cpp` and `src/d3dapp.h` are Microsoft's
   DirectX SDK sample application framework, (c) Microsoft Corporation, carried because Stuart Gillam's GPL release of
   the game's source includes them; Microsoft has not licensed them under the GPL. Their header keeps Microsoft's
@@ -73,10 +76,10 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   interface written for this project (GPL-3.0), so the sound code that includes it compiles unchanged.
 - `src/splinebasis.c`, an unreferenced 872-byte data block typed out from the retail executable, has no functions and
   matters only to the link's data layout; it is left out.
-- `config/link-objects.txt` lists all five of those files in retail's link order, each under a comment line that says
-  it is not in this tree. `config/objects.tsv` has a row only for an object whose code names its own source file
-  (a `__FILE__` string), so of the five it lists `wavread.cpp` and `DXFont.cpp`, each annotated in its `note` column.
-  The check skips a source that is not present.
+- `config/link-objects.txt` lists all five left-out sources (the four in the first bullet and `src/splinebasis.c`) in
+  retail's link order, each under a comment line that says it is not in this tree. `config/objects.tsv` has a row only
+  for an object whose code names its own source file (a `__FILE__` string), so of the five it lists `wavread.cpp` and
+  `DXFont.cpp`, each annotated in its `note` column. The check skips a source that is not present.
 - The link (`tools/link.py`) needs further inputs that are not freely available, among them the prebuilt NvTriStrip
   library retail linked and import libraries made from the game's DLLs (`config/link-inputs.sha256` pins them all).
   Reproducing the linked executable is therefore not yet possible from this tree and public inputs alone; the
@@ -96,7 +99,8 @@ You need, all from your own copies:
   mission-script files are compiled in; `config/game-data.sha256` pins them).
 - **Visual C++ 6.0 SP5 Professional**: CL 12.00.8804 driving C1 12.00.8867, C1XX 12.00.8964 and C2 12.00.8966 (the
   `c2.dll` SP5 installs from `msvcep.dll`), LINK 6.00.8447. The binaries must match `config/toolchain.sha256`, and
-  the 993-file `VC98/Include` tree the single-digest manifest `config/vc6-include.sha256`.
+  the 993-file `VC98/Include` tree (its count is recorded in [notes/toolchain.md](notes/toolchain.md)) must match the
+  single-digest manifest `config/vc6-include.sha256`.
 - **The DirectX 9.0 SDK** (`dx9sdk.exe`, SHA-256 `3825dec8…`): its `Include/` folder (`config/dx9sdk-include.sha256`)
   and its sample framework's `Samples/C++/Common/Include/` (`config/dx9samples-include.sha256`).
 - **Wine** able to run 32-bit programs, **Python 3** (the unit tests ran on 3.14; older versions are untested),
@@ -107,8 +111,9 @@ You need, all from your own copies:
 
 The match depends on the Windows paths at which the compiler sees itself and the SDK: the precompiled header records
 the paths of the headers it read, and code compiled with a header made under other paths differs
-(`CHud::RenderWorldTargetSprites` by 672 bytes). The tools therefore never run the compiler from where your copies
-are. Inside the Wine prefix they link
+(`tools/decomp.py` gives 672 bytes for `CHud::RenderWorldTargetSprites` as an example; this tree does not list that
+function, so the figure cannot be checked here). The tools therefore never run the compiler from where your copies are.
+Inside the Wine prefix they link
 
 - `C:\Program Files\Microsoft Visual Studio` to your Visual C++ 6 install (`BEA_VC6`),
 - `C:\DXSDK\Include` and `C:\DXSDK\Samples\C++\Common\Include` to your two SDK folders,

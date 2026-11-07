@@ -1,7 +1,7 @@
 # Toolchain and flags
 
 Status: reference
-Last updated: 2026-11-06
+Last updated: 2026-11-07
 Summary: The compiler, flags and inputs the retail build used, and how each was established.
 
 - Compiler: Visual C++ 6.0 SP5 Professional, the retail build exactly: CL 12.00.8804 driving C1 12.00.8867,
@@ -15,15 +15,15 @@ Summary: The compiler, flags and inputs the retail build used, and how each was 
   `/GR` because retail carries RTTI: the dword before each virtual table points to its complete object locator, which
   names the class's type descriptor (CActor: table `005d844c`, locator `0060c288`, type descriptor `.?AVCActor@@` at
   `00622c48`). It changes no code: against the same source without it, the full check keeps every match it had then, with identical status
-  lines, and across all 327 objects only EH label names, each table's leading locator pointer and the `??_R` records
+  lines, and across the 327 objects compared, only EH label names, each table's leading locator pointer and the `??_R` records
   differ. `check_vtables` reads the slots after the locator pointer and checks that pointer against retail's dword
-  before the table (889 tables match, as before; 721 locators placed, none conflicting).
-- Inputs: `check_toolchain()` pins the six tool binaries and both complete include trees, including
+  before the table (888 tables match and none conflicts, as [docs/check/check-summary.txt](../docs/check/check-summary.txt) records).
+- Inputs: `check_toolchain()` pins the seven tool binaries (five compiler and linker files, `MSPDB60.DLL` and `MSVCRT.DLL`) and both complete include trees, including
   extensionless VC6 headers. The VC6 tree's 993 files (25,438,712 bytes) were independently checked file by file before adding `config/vc6-include.sha256`.
   Authored fixtures refuse changed, missing and added files in either include tree. The link's library
   inputs are pinned in `config/link-inputs.sha256` (path and SHA-256, in command-line order, the import
   libraries in retail's import-descriptor order); `tools/link.py` refuses to link if one differs. The
-  retail-derived ones (import libraries made from the game's DLLs) stay in the untracked inputs folder.
+  retail-derived ones (import libraries made from the game's DLLs) stay in the folder named by `BEA_LAB` ([README, Settings](../README.md#settings)).
   `config/link-sources.sha256` pins third-party sources the link compiles; it lists none at present,
   because NVIDIA's NvTriStrip links as its prebuilt library (`config/link-inputs.sha256`). `linklib/`
   also holds the link's provisional, link-only pieces, labelled as such: definitions whose owner or layout is open,
@@ -38,9 +38,9 @@ Summary: The compiler, flags and inputs the retail build used, and how each was 
 
 The matching compiler core is not a recovered original project. Original project/PCH settings, the full
 link/resource command and initialized-data reconstruction remain open. `src/common.h` and other missing
-game headers are reconstructed; `src/stdafx.h` is empty. The SP5 compiler DLLs were installed over the Visual C++ 6.0 header and library tree.
+game headers are reconstructed; `src/stdafx.h` contains only a comment. The SP5 compiler DLLs were installed over the Visual C++ 6.0 header and library tree.
 Matching function bodies supports this configuration without proving that entire installation equals
 the original developer's. Missing source/header/translation-unit context is a stronger current lead for
 shared inlining discrepancies than another indiscriminate compiler-version or source-permutation sweep.
 
-A bounded September 30 PCH experiment made `common.h` with `/Yc` in Sphere.cpp and used it with `/Yu` in Sphere.cpp, Geometry.cpp and console.cpp. All 84 exact controls survive; the three selected unmatched bodies are unchanged. The two apparent changed functions have identical instruction bytes and only renumbered local exception labels; unused `operator new` emission also changes. This specific PCH configuration does not explain the target mismatches, and no production flag is changed. Other original header contents or PCH boundaries remain unknown.
+A bounded 2026-09-30 PCH experiment made `common.h` with `/Yc` in Sphere.cpp and used it with `/Yu` in Sphere.cpp, Geometry.cpp and console.cpp. All 84 exact controls survive; the three selected unmatched bodies are unchanged. The two apparent changed functions have identical instruction bytes and only renumbered local exception labels; unused `operator new` emission also changes. This specific PCH configuration does not explain the target mismatches, and no production flag is changed. Other original header contents or PCH boundaries remain unknown.

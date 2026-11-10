@@ -1,7 +1,7 @@
 # Divergences from Stuart's source
 
 Status: reference
-Last updated: 2026-11-07
+Last updated: 2026-11-10
 Summary: Where the retail build differs from Stuart Gillam's published source, by file and address.
 
 Each entry names the retail evidence that forced it.

@@ -1,7 +1,7 @@
 # Matching techniques
 
 Status: reference
-Last updated: 2026-11-07
+Last updated: 2026-11-10
 Summary: The working rules for reaching a byte match, each with the function that proved it.
 
 - **Index of the 2026-10-02 rules** (one line per rule, with the function that proved it; the dated

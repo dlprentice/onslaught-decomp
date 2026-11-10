@@ -1,7 +1,7 @@
 # Findings that shape the source
 
 Status: reference
-Last updated: 2026-11-07
+Last updated: 2026-11-10
 Summary: What the compiler, linker and retail evidence showed about the source's form, by finding.
 
 Scores quoted in the entries below (5,470 of 5,482, say) are the scores as of each entry; the current score is on [docs/SCORE.md](../docs/SCORE.md). Entries that carry a date give month and day in 2026.

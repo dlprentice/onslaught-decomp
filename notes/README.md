@@ -1,7 +1,7 @@
 # Notes
 
 Status: active index
-Last updated: 2026-11-06
+Last updated: 2026-11-10 (Concession entry explains stand-ins and brackets)
 Summary: the matching knowledge behind the decompilation, by area.
 
 The source's own comments hold the per-function knowledge that shaped it (the `STAND-IN`, `RECONSTRUCTED` and
@@ -41,6 +41,11 @@ before it is published.
   them `Unwind@ADDRESS`.
 - **Concession** (and the `STAND-IN`, `RECONSTRUCTED` and `CONCESSION` marks): a place where reproducing the retail bytes
   needed something other than the form the original authors would have written. Each is labelled with what proved it.
+  A `STAND-IN` helper struct or a run of redundant brackets exists so that the Visual C++ 6 compiler the 2003 game was built with emits the
+  retail bytes, including the order in which it adds floating-point terms and numbers its temporaries. It is not an
+  optimisation and not the original authors' style; the original spelling is unknown, and replacing a stand-in with a
+  natural form that gives the same bytes is welcome. Examples are in [matching-techniques.md](matching-techniques.md)
+  and [compiler-findings.md](compiler-findings.md).
   One function matches through a build concession recorded in `config/object-patches.tsv`.
 - **PC24, PC53 and PC64**: the x87 precision-control settings for 24-, 53- and 64-bit significands (single, double and extended precision).
 - **RN**: round to nearest, the x87 default rounding mode.

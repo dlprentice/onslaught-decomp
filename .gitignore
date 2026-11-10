@@ -6,3 +6,4 @@ __pycache__/
 *.pyc
 # an optional local file of default input locations (README, Settings)
 /tools/site_paths.py
+settings.local.json

@@ -1,7 +1,7 @@
 # Contributing
 
 Status: active
-Last updated: 2026-11-06
+Last updated: 2026-11-10 (concession bullet explains stand-ins and brackets)
 Summary: where each kind of work goes, what a first contribution needs and runs, how a pull request on this generated repository is taken in, how to report a problem, the rules for `src/`, and the licence of contributions.
 
 Thank you for your interest. Please read this before opening an issue or a pull request.
@@ -103,7 +103,11 @@ attach recordings, saves or files taken from the game.
   personal paths or original material; do not attach them.
 - **Concessions are labelled.** Where the source takes a form the original authors would not have written in order to
   reproduce the compiler's output (a stand-in, an ordering forced by the compiler's allocator), mark it with a
-  `STAND-IN`, `RECONSTRUCTED` or `CONCESSION` comment that says why and what proved it.
+  `STAND-IN`, `RECONSTRUCTED` or `CONCESSION` comment that says why and what proved it. These forms exist so that the
+  Visual C++ 6 compiler the 2003 game was built with emits the original bytes, including its floating-point term order and temporary
+  numbering; they are not an optimisation and not the original authors' style. Their original spelling is unknown, and
+  replacing one with a natural form that gives the same bytes is welcome (see `notes/matching-techniques.md` and
+  `notes/compiler-findings.md`).
 - Claims about behaviour cite their evidence: a byte comparison, an emulator run (`tools/equiv.py`), a capture, or a
   file and line of the game's source release.
 

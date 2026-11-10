@@ -1,7 +1,7 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-11-06
+Last updated: 2026-11-10 (why stand-in structs and extra brackets exist)
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
@@ -56,6 +56,9 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   compiler's output justifies, it says so in a `STAND-IN`, `RECONSTRUCTED` or `CONCESSION` comment with the evidence.
   One function matches through a build concession, bytes written into its compiled object after compiling
   (`config/object-patches.tsv`).
+- It is not performance work and not the original authors' style. Some functions carry helper structs labelled
+  `STAND-IN` and many redundant brackets; they exist only so that the Visual C++ 6 compiler the 2003 game was built with emits the retail
+  bytes (see "Reading the source" below).
 - It contains no part of the game: no executable, data, text dump or byte listing beyond short signatures. The tools
   read your own copy of the game at run time and check it by its hash first. The PC build's hard-coded strings
   (`src/PCText.cpp`, the credits and front-end text) are in the source because the match needs them.
@@ -68,6 +71,17 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   1998-2000 notice, and [THIRD-PARTY.md](THIRD-PARTY.md) and [REUSE.toml](REUSE.toml) record their terms. Every other
   sample file the game linked is left out (below), and so is the SDK's own sample framework, whose headers the build
   reads from your copy of the SDK.
+
+### Reading the source
+
+Much of `src/` is shaped to make the Visual C++ 6 compiler the 2003 game was built with emit exactly the original bytes, and that shape is
+sometimes odd. A `STAND-IN` helper struct, or a run of brackets that look redundant, pins things the compiler would
+otherwise decide differently: the order in which it adds floating-point terms, how it numbers its temporaries, which
+operands it evaluates first. These forms are not an optimisation and they are not how the original authors wrote the
+code. What the original spelling was is unknown; each stand-in is labelled `STAND-IN` for that reason, with the
+evidence that justified it. Do not read one as speed advice or as the original style. Replacing a stand-in with a
+natural form that gives the same bytes is welcome; one that changes the bytes fails the check. Worked examples are in
+[notes/matching-techniques.md](notes/matching-techniques.md) and [notes/compiler-findings.md](notes/compiler-findings.md).
 
 ## What is left out
 

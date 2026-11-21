@@ -18,6 +18,14 @@ from tools import decomp
 from tools.binfmt import Coff, Section, Symbol, SCN_CNT_CODE, SYM_EXTERNAL
 
 
+class UndnameMissing(unittest.TestCase):
+    def test_a_missing_llvm_undname_stops_with_its_name(self):
+        with patch.object(decomp.subprocess, "run", side_effect=FileNotFoundError("llvm-undname")):
+            with self.assertRaises(SystemExit) as stopped:
+                decomp.demangle(["?Name@@YAXXZ"])
+        self.assertIn("llvm-undname", str(stopped.exception))
+
+
 class DisassemblyInputs(unittest.TestCase):
     def test_overlapping_calls_read_their_own_bytes_and_address(self):
         with tempfile.TemporaryDirectory(prefix="bea-disassembly-test-") as temp:

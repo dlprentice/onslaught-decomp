@@ -1784,13 +1784,13 @@ address	bytes	tableName	symbol	demangled	source
 0x00459c10	524	CFEPE3LevelSelect__ButtonPressed	?ButtonPressed@CFEPE3LevelSelect@@UAEXHM@Z	public: virtual void __thiscall CFEPE3LevelSelect::ButtonPressed(int, float)	src/FEPE3LevelSelect.cpp
 0x00459e50	142	CFEPE3LevelSelect__RenderPreCommon	?RenderPreCommon@CFEPE3LevelSelect@@UAEXMW4EFrontEndPage@@@Z	public: virtual void __thiscall CFEPE3LevelSelect::RenderPreCommon(float, enum EFrontEndPage)	src/FEPE3LevelSelect.cpp
 0x00459ee0	2365	CFEPE3LevelSelect__Render	?Render@CFEPE3LevelSelect@@UAEXMW4EFrontEndPage@@@Z	public: virtual void __thiscall CFEPE3LevelSelect::Render(float, enum EFrontEndPage)	src/FEPE3LevelSelect.cpp
-0x0045a820	31	ZERO_FVECTOR__init	_$E22	_$E22	src/FEPGoodies.cpp
-0x0045a840	195	ID_FMATRIX__init	_$E25	_$E25	src/FEPGoodies.cpp
-0x0045a910	29	OLD_GOODIE_MESH_SYSTEM__init	_$E66	_$E66	src/FEPGoodies.cpp
-0x0045a930	10	OLD_GOODIE_MESH_SYSTEM__exit	_$E64	_$E64	src/FEPGoodies.cpp
+0x0045a820	31	ZERO_FVECTOR__init	_$E23	_$E23	src/FEPGoodies.cpp
+0x0045a840	195	ID_FMATRIX__init	_$E26	_$E26	src/FEPGoodies.cpp
+0x0045a910	29	OLD_GOODIE_MESH_SYSTEM__init	_$E67	_$E67	src/FEPGoodies.cpp
+0x0045a930	10	OLD_GOODIE_MESH_SYSTEM__exit	_$E65	_$E65	src/FEPGoodies.cpp
 0x0045a940	726	CGoodieData__GetMethod	?GetMethod@CGoodieData@@QBEXPAG@Z	public: void __thiscall CGoodieData::GetMethod(unsigned short *) const	src/FEPGoodies.cpp
-0x0045ac20	5	goodies__init	_$E69	_$E69	src/FEPGoodies.cpp
-0x0045ac30	6963	goodies__initbody	_$E68	_$E68	src/FEPGoodies.cpp
+0x0045ac20	5	goodies__init	_$E70	_$E70	src/FEPGoodies.cpp
+0x0045ac30	6963	goodies__initbody	_$E69	_$E69	src/FEPGoodies.cpp
 0x0045c770	46	CGoodieData__ctor	??0CGoodieData@@QAE@HHHHW4EKilledType@@0@Z	public: __thiscall CGoodieData::CGoodieData(int, int, int, int, enum EKilledType, enum EKilledType)	src/FEPGoodies.cpp
 0x0045c7a0	203	CFEPGoodies__Init	?Init@CFEPGoodies@@UAEHXZ	public: virtual int __thiscall CFEPGoodies::Init(void)	src/FEPGoodies.cpp
 0x0045c870	355	CFEPGoodies__Deserialise	?Deserialise@CFEPGoodies@@QAEXPAVCChunkReader@@@Z	public: void __thiscall CFEPGoodies::Deserialise(class CChunkReader *)	src/FEPGoodies.cpp
@@ -5417,7 +5417,7 @@ address	bytes	tableName	symbol	demangled	source
 0x00549480	31	ZERO_FVECTOR__init	_$E36	_$E36	src/DXMeshRenderer.cpp
 0x005494a0	195	ID_FMATRIX__init	_$E39	_$E39	src/DXMeshRenderer.cpp
 0x00549570	8844	CMeshRenderer__RenderMeshCore	?RenderMeshCore@CMeshRenderer@@SAXVFVector@@PAVFMatrix@@PAVCMeshPart@@PAVIRenderableThing@@PAVCRenderThing@@HHPAVCMotionController@@H@Z	public: static void __cdecl CMeshRenderer::RenderMeshCore(class FVector, class FMatrix *, class CMeshPart *, class IRenderableThing *, class CRenderThing *, int, int, class CMotionController *, int)	src/DXMeshRenderer.cpp
-0x0054b800	1912	RenderPart2D	?RenderPart2D@@YAXPAVCMeshPart@@PAVIRenderableThing@@@Z	void __cdecl RenderPart2D(class CMeshPart *, class IRenderableThing *)	src/DXMeshRenderer.cpp
+0x0054b800	1912	RenderPart2D	?RenderPart2D@@YAXPAVCMeshPart@@PAVIRenderableThing@@H@Z	void __cdecl RenderPart2D(class CMeshPart *, class IRenderableThing *, int)	src/DXMeshRenderer.cpp
 0x0054bf80	112	CDXMeshVB__ctor	??0CDXMeshVB@@QAE@XZ	public: __thiscall CDXMeshVB::CDXMeshVB(void)	src/DXMeshVB.cpp
 0x0054bff0	32	CDXMeshVB__scalar_deleting_dtor	??_GCDXMeshVB@@UAEPAXI@Z	public: virtual void * __thiscall CDXMeshVB::`scalar deleting dtor'(unsigned int)	src/DXMeshVB.cpp
 0x0054c010	142	CDXMeshVB__dtor	??1CDXMeshVB@@UAE@XZ	public: virtual __thiscall CDXMeshVB::~CDXMeshVB(void)	src/DXMeshVB.cpp

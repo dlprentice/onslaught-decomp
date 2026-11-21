@@ -5,4 +5,3 @@
 # Every row is a concession, described in its REASON. Only decomp.py's own commands (check, score, diff, build) apply them;
 # every other caller of build() measures the natural compiler output.
 # TAB-separated: SOURCE SYMBOL OFFSET EXPECTED REPLACEMENT REASON
-mesh.cpp	?InitFromMem@CMesh@@QAEHAAVCDXMemBuffer@@H@Z	0x3236	c64401ff00	c64408ff00	CMesh::InitFromMem 004a5b70: the old-format frame-key zero store at 004a8da6; ours mov byte [ecx+eax-1],0, retail [eax+ecx-1],0 (same address, SIB base/index order). A build concession, 2026-10-15: no source form found gives retail's operand order

@@ -300,9 +300,11 @@ def provisional(out: Path) -> list[Path]:
     objs = [compile_cpp(src, lib / src.with_suffix(".obj").name, []) for src in sorted(LINKLIB.glob("*.cpp"))]
     aliases = LINKLIB / "aliases.tsv"
     if aliases.exists():
-        obj = lib / "aliases.obj"
-        obj.write_bytes(alias_object(read_aliases(aliases.read_text())))
-        objs.append(obj)
+        pairs = read_aliases(aliases.read_text())
+        if pairs:
+            obj = lib / "aliases.obj"
+            obj.write_bytes(alias_object(pairs))
+            objs.append(obj)
     return objs
 
 

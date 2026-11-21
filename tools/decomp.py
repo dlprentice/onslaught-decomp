@@ -20,7 +20,7 @@ address, relocation fields aside, and every relocation lands where the rest of t
 Commands:
   decomp.py build            compile every source file into build/
   decomp.py check [FILE...]  build, compare and print each function's result
-  decomp.py score            build, compare all files and rewrite the score in README.md
+  decomp.py score            build, compare all files and rewrite the score (docs/SCORE.md where that page exists)
   decomp.py diff ADDRESS     side-by-side disassembly of one annotated function against retail
   decomp.py dis ADDRESS      retail disassembly of one function, with callee names and import slots
 """
@@ -594,11 +594,19 @@ def demangled_params(text: str | None) -> int | None:
     return commas + 1
 
 
+def undname(names: list[str]) -> str:
+    """llvm-undname's output for the mangled names (it comes with LLVM); a missing program stops the command with its name."""
+    try:
+        return subprocess.run(["llvm-undname"], input="\n".join(names) + "\n", capture_output=True, text=True).stdout
+    except FileNotFoundError:
+        raise SystemExit("llvm-undname not found: install LLVM (the package that provides llvm-undname) and put it on PATH") from None
+
+
 def demangle(symbols: list[str]) -> dict[str, str]:
     mangled = sorted({s for s in symbols if s.startswith("?")})
     if not mangled:
         return {}
-    text = subprocess.run(["llvm-undname"], input="\n".join(mangled) + "\n", capture_output=True, text=True).stdout
+    text = undname(mangled)
     lines, want, result = text.split("\n"), set(mangled), {}
     for i, line in enumerate(lines[:-1]):
         if line in want and line not in result and not lines[i + 1].startswith("error:"):

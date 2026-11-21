@@ -1,7 +1,7 @@
 # onslaught-decomp
 
 Status: active
-Last updated: 2026-11-10 (why stand-in structs and extra brackets exist)
+Last updated: 2026-11-21 (0 build concessions, 0 link aliases, Code of Conduct)
 Summary: a byte-matching decompilation of *Battle Engine Aquila*'s PC game code, the tools that judge the match, and
 the knowledge behind it; bring your own game and compiler.
 
@@ -9,13 +9,19 @@ A byte-matching decompilation of *Battle Engine Aquila* (Lost Toys, 2003) agains
 `BEA.exe`, SHA-256 `74154bfae14ddc8ecb87a0766f5bc381c7b7f1ab334ed7a753040eda1e1e7750`. The C++ in `src/` starts
 from Stuart Gillam's GPL release of the game's source ([stuart73/Onslaught](https://github.com/stuart73/Onslaught))
 and has been reconstructed, function by function. The check compares objects compiled by Microsoft Visual C++ 6.0 SP5 against the
-retail executable, with the documented object correction and exclusions described below.
+retail executable, with the exclusions described below.
 
-**From this tree, with the documented object correction, the check matches
+**From this tree, purely from C++ source with zero object-byte concessions, the check matches
 5,449 of the retail game's 5,482 functions** (1,359,136 of 1,367,287 bytes), and
-every function this tree annotates matches. The other 33 are defined in four files of Microsoft's DirectX SDK sample
-code that this tree leaves out (see "What is left out"); [docs/SCORE.md](docs/SCORE.md) lists them under "Not in this
-tree". The record of the check that measured this is in [docs/check/](docs/check/).
+every function this tree annotates matches (`config/object-patches.tsv` has 0 rows; `linklib/aliases.tsv` has 0
+aliases). All 5,482 of 5,482 retail game functions match in the full working tree including the 33 functions defined in
+four files of Microsoft's DirectX SDK sample code that this tree leaves out (see "What is left out");
+[docs/SCORE.md](docs/SCORE.md) lists those 33 under "Not in this tree". The record of the check that measured this is
+in [docs/check/](docs/check/).
+
+**Questions, feedback, or discussion?** Start a thread in
+[Discussions on onslaught-ce](https://github.com/dlprentice/onslaught-ce/discussions) or open an issue here (see
+[CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Related projects
 
@@ -27,8 +33,8 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 - [onslaught-preservation](https://github.com/dlprentice/onslaught-preservation): documentation of the game's
   formats, saves, mechanics, levels and engine.
 - [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor): the companion app for careers,
-  saves, settings and lore (to be renamed onslaught-companion; its player capabilities move into Onslaught CE, and the
-  separate app is phased out after verified replacement).
+  saves, settings and lore (its player capabilities are moving into Onslaught CE, and the separate app is being phased
+  out after verified replacement).
 - [stuart73/Onslaught](https://github.com/stuart73/Onslaught): Stuart Gillam's GPL release of the game's source,
   which `src/` starts from.
 
@@ -37,7 +43,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | Path | What it holds |
 | --- | --- |
 | `src/` | the game's C++: Stuart's release, the PC build's changes, and the reconstructed rest. Each function carries a `// FUNCTION: 0xADDRESS` annotation naming its retail address. |
-| `linklib/` | the link's provisional, link-only pieces, labelled as such; never part of the score |
+| `linklib/` | the link's provisional, link-only definitions, labelled as such (`linklib/aliases.tsv` is empty: 0 link aliases); never part of the score |
 | `config/` | the compiler flags, the SHA-256 pins of every input but the executable (its pin is in `tools/decomp.py`), the function table, the link order ([config/README.md](config/README.md)) |
 | `tools/` | the matching check, the linker and link comparison, the whole-executable inventory and data tools ([tools/README.md](tools/README.md)) |
 | `tools/ghidra/` | a Ghidra script that names the functions of this tree's function table in your own copy of the executable ([tools/ghidra/README.md](tools/ghidra/README.md)) |
@@ -45,7 +51,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
 | `docs/SCORE.md` | the score block (the summary and the matched functions), rewritten by `tools/decomp.py score`; the list of functions this tree leaves out sits outside that block |
 | `docs/check/` | the check this tree's score comes from: a summary of its log and its matched-symbol table ([docs/check/README.md](docs/check/README.md)) |
 | `THIRD-PARTY.md` | the third-party material in `src/`, and what is left out |
-| `CONTRIBUTING.md`, `SECURITY.md`, `.github/` | how to contribute and where each kind of work goes, how to report a security problem, and the issue forms and pull request template |
+| `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.github/` | how to contribute and where each kind of work goes, the code of conduct, how to report a security problem, and the issue forms and pull request template |
 
 ## What it is, and what it is not
 
@@ -54,8 +60,7 @@ tree". The record of the check that measured this is in [docs/check/](docs/check
   (`tools/decomp.py`'s docstring gives the rules).
 - It is not the original source text and not a clean-room implementation. Where the source takes a form only the
   compiler's output justifies, it says so in a `STAND-IN`, `RECONSTRUCTED` or `CONCESSION` comment with the evidence.
-  One function matches through a build concession, bytes written into its compiled object after compiling
-  (`config/object-patches.tsv`).
+  No function relies on a post-compile build concession (`config/object-patches.tsv` is empty: 0 object-byte patches).
 - It is not performance work and not the original authors' style. Some functions carry helper structs labelled
   `STAND-IN` and many redundant brackets; they exist only so that the Visual C++ 6 compiler the 2003 game was built with emits the retail
   bytes (see "Reading the source" below).

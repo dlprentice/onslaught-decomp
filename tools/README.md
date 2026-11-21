@@ -20,7 +20,7 @@ These need no game, compiler or SDK. On a tree without those inputs, 9 tests ski
 Visual C++ 6 toolchain, 2 need the retail executable, 1 module needs Unicorn (`requirements.txt`) and 4 cover research
 scanners that are not published. A skip is not a failure; `OK (skipped=9)` is the usual result here. One module runs
 alone as `python3 -m unittest tools.decomp_tests`, for example. The tools that demangle names (`decomp.py check` and
-`score`, and `rtti.py`) need `llvm-undname` from the LLVM package.
+`score`, and `rtti.py`) need `llvm-undname` from the LLVM package and stop with its name when it is missing.
 
 ## The match
 

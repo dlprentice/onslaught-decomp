@@ -1,7 +1,7 @@
 # Score
 
 Status: generated: `python3 tools/decomp.py score` rewrites the block between the markers
-Last updated: 2026-10-31
+Last updated: 2026-11-21
 Summary: how many of the retail game's functions this tree matches byte for byte, which, and which it leaves out.
 
 The score counts unique retail function addresses and their recorded extents, not C++ symbols: linker-folded aliases
@@ -19,7 +19,7 @@ the one it reproduces. The 33 functions those sources define are listed after it
 not counted as matched here.
 
 <!-- score:begin -->
-**5,449 of 5,482 game functions (99.40%) and 1,359,136 of 1,367,287 bytes (99.40%) match the retail executable byte for byte.** 1 matched through a build concession, bytes written into the compiled object after compiling (`config/object-patches.tsv`; the source alone leaves 5,448 matching). 5,449 functions are annotated. The 1,185 compiler-generated unwind funclets (19,169 bytes) are counted with their parent objects once those match. 32 import thunks (the linker's `jmp [IAT]` stubs for DLL calls, each verified against the import table) are library code and not counted.
+**5,449 of 5,482 game functions (99.40%) and 1,359,136 of 1,367,287 bytes (99.40%) match the retail executable byte for byte.** 5,449 functions are annotated. The 1,185 compiler-generated unwind funclets (19,169 bytes) are counted with their parent objects once those match. 32 import thunks (the linker's `jmp [IAT]` stubs for DLL calls, each verified against the import table) are library code and not counted.
 
 ### Matched functions
 
@@ -2587,7 +2587,7 @@ not counted as matched here.
 | `004a5670` | CMesh__OptimiseTextures | 700 | src/mesh.cpp |
 | `004a5930` | MESH_CHUNK__init | 49 | src/mesh.cpp |
 | `004a5970` | CMesh__InitFromFile | 497 | src/mesh.cpp |
-| `004a5b70` | CMesh__InitFromMem (build concession) | 18546 | src/mesh.cpp |
+| `004a5b70` | CMesh__InitFromMem | 18546 | src/mesh.cpp |
 | `004aa3f0` | FMatrix__GetColumnX | 23 | src/MeshPart.cpp |
 | `004aa410` | CMesh__FindTexture | 201 | src/mesh.cpp |
 | `004aa4e0` | CMesh__GetNumEmitters | 27 | src/mesh.cpp |

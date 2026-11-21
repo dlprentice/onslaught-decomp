@@ -1,10 +1,12 @@
 # Contributing
 
 Status: active
-Last updated: 2026-11-10 (concession bullet explains stand-ins and brackets)
+Last updated: 2026-11-21 (Code of Conduct link; 0 build concessions)
 Summary: where each kind of work goes, what a first contribution needs and runs, how a pull request on this generated repository is taken in, how to report a problem, the rules for `src/`, and the licence of contributions.
 
 Thank you for your interest. Please read this before opening an issue or a pull request.
+
+Everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Where to contribute
 
@@ -18,7 +20,7 @@ is the canonical map; this is the short version.
 | Playing Onslaught CE: its bugs, Linux and Windows issues, the launcher and updates (Internet multiplayer is planned, not in this version yet) | [onslaught-ce](https://github.com/dlprentice/onslaught-ce). Also generated, with the same route. The port's platform layer (`port/`) lives there. |
 | The Godot rebuild | [onslaught-godot](https://github.com/dlprentice/onslaught-godot), edited directly. |
 | How the game works: file formats, saves, mechanics, levels, engine | [onslaught-preservation](https://github.com/dlprentice/onslaught-preservation), edited directly. It uses this repository's function names. |
-| The Companion (saves, backups, settings, lore, music), and the program's goals and plan (`GOAL.md`, `PROGRAM.md`) | [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor). Its `rebuild/` and `reverse-engineering/` folders are frozen copies: rebuild work goes to onslaught-godot, documentation to onslaught-preservation. The Companion's features are moving into Onslaught CE, so new feature work belongs in CE. |
+| The Companion (saves, backups, settings, lore, music), and the program's goals and plan (`GOAL.md`, `PROGRAM.md`) | [Onslaught-Career-Editor](https://github.com/dlprentice/Onslaught-Career-Editor). Its old `rebuild/` folder now points directly to `onslaught-godot`, and documentation lives in `onslaught-preservation`. The Companion's player-facing features are moving into Onslaught CE, so new feature work belongs in CE. |
 
 The Onslaught and AYAResourceExtractor forks on the same account are kept as pinned references, not contribution
 targets. Security reports follow [SECURITY.md](SECURITY.md). [REUSE.toml](REUSE.toml) says which licence
@@ -107,7 +109,8 @@ attach recordings, saves or files taken from the game.
   Visual C++ 6 compiler the 2003 game was built with emits the original bytes, including its floating-point term order and temporary
   numbering; they are not an optimisation and not the original authors' style. Their original spelling is unknown, and
   replacing one with a natural form that gives the same bytes is welcome (see `notes/matching-techniques.md` and
-  `notes/compiler-findings.md`).
+  `notes/compiler-findings.md`). No functions currently rely on post-compile object-byte concessions
+  (`config/object-patches.tsv` has 0 rows) or link aliases (`linklib/aliases.tsv` is empty).
 - Claims about behaviour cite their evidence: a byte comparison, an emulator run (`tools/equiv.py`), a capture, or a
   file and line of the game's source release.
 

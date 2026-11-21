@@ -19,13 +19,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from binfmt import PeImage  # noqa: E402
-from decomp import CONFIG, SPECIMEN, SPECIMEN_SHA256, retail_functions  # noqa: E402
+from decomp import CONFIG, SPECIMEN, SPECIMEN_SHA256, retail_functions, undname  # noqa: E402
 
 
 def undecorate(names: list[str]) -> dict[str, str]:
     """.?AVCThing@@ -> CThing (through llvm-undname on a synthesized ??_7 vftable name)."""
     wanted = {n: "??_7" + n[4:] + "6B@" for n in names if n.startswith(".?A")}
-    text = subprocess.run(["llvm-undname"], input="\n".join(wanted.values()) + "\n", capture_output=True, text=True).stdout
+    text = undname(list(wanted.values()))
     lines = text.split("\n")
     out = {}
     for n, m in wanted.items():

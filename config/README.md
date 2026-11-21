@@ -1,7 +1,7 @@
 # Configuration
 
 Status: active reference
-Last updated: 2026-11-06
+Last updated: 2026-11-21
 Summary: what each file in this folder pins or lists, where it came from, and which tools read it.
 
 | File | What it holds |
@@ -13,7 +13,7 @@ Summary: what each file in this folder pins or lists, where it came from, and wh
 | `functions.tsv`, `function-corrections.tsv` | the project's function table (address, bytes, name) and each correction made to it (an extent, an added function or a removed block), with its evidence |
 | `objects.tsv` | retail's objects: the address range of each source's functions and where its static initializers start |
 | `classes.tsv` | retail's classes and their virtual tables: one row per table the RTTI scan finds (`tools/rtti.py`), 729 rows for 656 classes. The check compares compiled tables with the 724 rows that have slots (the other five are not used), and it reports one line per compiled table, so its count (888 in `docs/check/check-summary.txt`) is not a row count |
-| `object-patches.tsv` | the one build concession: bytes written into a compiled object after compiling |
+| `object-patches.tsv` | post-compile object-byte concessions (currently empty: 0 rows; every annotated function matches purely from source) |
 | `link-objects.txt`, `link-library-order.txt`, `link-thunks.txt` | retail's link order of objects and library members, and its import thunks |
 | `link-inputs.sha256`, `link-sources.sha256` | the link's library inputs, each pinned (the toolchain's, and the further ones under `BEA_LAB`, among them NVIDIA's prebuilt NvTriStrip library), and the third-party sources it would compile (none at present) |
 

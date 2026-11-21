@@ -377,8 +377,7 @@ Each is labelled where it lives and removed when its question closes.
   would put their commons ahead of PauseMenu's. `pausecommons.c` therefore links after the members. Leaving the
   common-defining members to library search instead moves their code (`.text` equal in place 222,265 to 113,021) and
   was rejected.
-- **`linklib/provisional.cpp` and `linklib/aliases.tsv`**: link-only definitions (e.g. `SYSTEM` at `00896ca4`) and weak
-  aliases for second names whose owner or layout is open. Never part of the score.
+- **`linklib/provisional.cpp` and `linklib/aliases.tsv`**: link-only definitions (`SYSTEM` at `00896ca4`, `gNoMeshPartOptimise`, `CWeapon::GetReadiness`, `gLinkBss_provisional[1608]`). `linklib/aliases.tsv` (and `port/aliases.tsv`) is now empty (0 aliases): all five former weak aliases (`GAME_RENDER_MODE`, `RenderMeshPart0054b800`, and `CXBOXAsyncCache::{Busy,GrabMutex,ReleaseMutex}`) now spell their real definitions directly in `src/`. Never part of the score.
   Its two initializer funclets (`_$E10`, 32 bytes, and `_$E13`, 208 bytes, 240 bytes in all, linked after the last CRT member)
   belong to `SYSTEM`'s real defining object (the missing-objects question); they and the three-versus-two thunk are what
   remains of the library region's excess over retail's after the thunks above (304 = 240 + 6 + padding + the library members'

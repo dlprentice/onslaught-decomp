@@ -1,7 +1,7 @@
 # Notes
 
 Status: active index
-Last updated: 2026-11-10 (Concession entry explains stand-ins and brackets)
+Last updated: 2026-11-21 (0 build concessions)
 Summary: the matching knowledge behind the decompilation, by area.
 
 The source's own comments hold the per-function knowledge that shaped it (the `STAND-IN`, `RECONSTRUCTED` and
@@ -46,7 +46,8 @@ before it is published.
   optimisation and not the original authors' style; the original spelling is unknown, and replacing a stand-in with a
   natural form that gives the same bytes is welcome. Examples are in [matching-techniques.md](matching-techniques.md)
   and [compiler-findings.md](compiler-findings.md).
-  One function matches through a build concession recorded in `config/object-patches.tsv`.
+  No functions currently rely on post-compile object patching (`config/object-patches.tsv` has 0 rows; all 5,449 public
+  functions, and all 5,482 in the full tree, match purely from source, with 0 link aliases in `linklib/aliases.tsv`).
 - **PC24, PC53 and PC64**: the x87 precision-control settings for 24-, 53- and 64-bit significands (single, double and extended precision).
 - **RN**: round to nearest, the x87 default rounding mode.
 - **CW**: the x87 control word, which holds the precision and rounding settings above.

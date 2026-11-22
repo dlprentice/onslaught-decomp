@@ -1,13 +1,15 @@
 # Apply the decompilation's function table (names, extents, source files) to your own copy of BEA.exe.
 # SPDX-License-Identifier: GPL-3.0-only
 # @category Onslaught
-"""Apply the decompilation's function names to Battle Engine Aquila's retail executable in Ghidra.
+"""Apply the decompilation's function and virtual-table names to Battle Engine Aquila's retail executable in Ghidra.
 
 Import your own BEA.exe (SHA-256 in the top-level README) into a Ghidra project, open it, and run this script. For
 every row of this clone's config/functions.tsv (with config/function-corrections.tsv applied, as tools/decomp.py reads
 them) it creates or renames the function at that address, sets its extent from the row's byte count where Ghidra
-allows, and adds a plate comment naming the source file of src/ that defines it. Nothing is read from anywhere else:
-the names and extents are the decompilation's own public tables, the file names come from the
+allows, and adds a plate comment naming the source file of src/ that defines it. When config/classes.tsv is present, a
+second stage labels each active virtual table (`Class__vftable`, or `Class__vftable_0xOFFSET` for secondary base
+subobjects) and adds a plate comment with its slot count and base hierarchy. Nothing is read from anywhere else: the
+names, extents and virtual tables are the decompilation's own public tables, and the file names come from the
 `// FUNCTION: 0xADDRESS` annotations in src/. Running it again changes nothing.
 
 Where it finds the clone: a path given as a script argument (headless: `ApplyOnslaughtNames.py PATH`), else the
@@ -21,8 +23,9 @@ It runs under PyGhidra (Python 3), the tested route. The syntax stays within Pyt
 Jython is not a route to rely on. All logic that does not touch Ghidra is in plain functions above `GhidraProgram`,
 driven by tools/ghidra_tests.py without Ghidra.
 
-Version 1 covers function names, extents and plate comments for the one executable the decompilation matches. Types and
-global variables are not applied: add a stage to STAGES for them.
+Version 2 covers function names, extents, source-file plate comments and virtual tables (config/classes.tsv) for the
+one executable the decompilation matches. Struct layouts and global variables are not applied yet: add a stage to
+STAGES for them.
 """
 from __future__ import print_function
 
@@ -36,6 +39,7 @@ EXPECTED_SHA256 = "74154bfae14ddc8ecb87a0766f5bc381c7b7f1ab334ed7a753040eda1e1e7
 # The image base the tables' addresses are written for (a PE's default).
 IMAGE_BASE = 0x400000
 COMMENT_PREFIX = "Onslaught decomp source: "
+VFTABLE_COMMENT_PREFIX = "Onslaught decomp vftable: "
 MAX_FILES_IN_COMMENT = 4
 SOURCE_SUFFIXES = (".c", ".cpp", ".h")
 
@@ -52,7 +56,11 @@ COUNTERS = (
     "renamed", "renamed_with_address_suffix", "names_unchanged", "rename_refused",
     "extents_set", "extents_unchanged", "extents_refused",
     "comments_added", "comments_updated", "comments_unchanged", "no_source_file",
-    "disassembled", "errors",
+    "disassembled",
+    "vftable_rows", "vftables_unused", "vftables_outside_image", "vftables_bad_rows",
+    "vftables_named", "vftables_named_with_address_suffix", "vftables_unchanged", "vftables_refused",
+    "vftable_comments_added", "vftable_comments_updated", "vftable_comments_unchanged",
+    "errors",
 )
 
 
@@ -173,6 +181,64 @@ def load_function_table(config_dir):
     return apply_corrections(table, corrections)
 
 
+def parse_vftables(text, label):
+    """The rows of config/classes.tsv (class, subobjectOffset, vftable, slots, bases) as
+    (vftable_address, subobject_offset, slots, class_name, bases) tuples in address order."""
+    lines = text.splitlines()
+    if not lines:
+        raise ToolError("%s is empty" % label)
+    header = lines[0].rstrip("\r").split("\t")
+    if header[:5] != ["class", "subobjectOffset", "vftable", "slots", "bases"]:
+        raise ToolError("%s: the header is not class, subobjectOffset, vftable, slots, bases" % label)
+    rows = []
+    seen = set()
+    for number, line in enumerate(lines[1:], 2):
+        line = line.rstrip("\r")
+        if not line.strip():
+            continue
+        cells = line.split("\t")
+        if len(cells) < 5 or not ADDRESS.match(cells[1]) or not ADDRESS.match(cells[2]) or \
+                not DIGITS.match(cells[3]):
+            raise ToolError("%s line %d: not a class, offset, vftable address, slot count and bases" % (label, number))
+        address = int(cells[2], 16)
+        if address in seen:
+            raise ToolError("%s line %d: a vftable address listed twice" % (label, number))
+        seen.add(address)
+        rows.append((address, int(cells[1], 16), int(cells[3]), cells[0], cells[4]))
+    rows.sort(key=lambda r: r[0])
+    return rows
+
+
+def load_vftable_table(config_dir):
+    """Rows from config/classes.tsv when present, else None (older or minimal clones without classes.tsv)."""
+    path = os.path.join(config_dir, "classes.tsv")
+    if not os.path.isfile(path):
+        return None
+    rows = parse_vftables(read_text(path), "classes.tsv")
+    if not rows:
+        raise ToolError("classes.tsv has a header and no rows: the table is damaged or cut short, so nothing is applied")
+    return rows
+
+
+def vftable_name(class_name, offset):
+    """A Ghidra symbol name for a class's virtual table (`Class__vftable` or `Class__vftable_0xOFFSET`)."""
+    clean = sanitize_name(class_name)
+    if not clean:
+        return ""
+    if offset:
+        return "%s__vftable_0x%x" % (clean, offset)
+    return "%s__vftable" % clean
+
+
+def vftable_comment(class_name, offset, slots, bases):
+    """The plate-comment detail for a virtual table (class, subobject offset, slot count and base hierarchy)."""
+    detail = "%s (+0x%x, %d slots)" % (class_name, offset, slots)
+    base_list = [b for b in bases.split(";") if b] if bases else []
+    if base_list:
+        detail += "; bases: " + ", ".join(base_list)
+    return detail
+
+
 # ---------------------------------------------------------------------------
 # Source files
 # ---------------------------------------------------------------------------
@@ -212,21 +278,23 @@ def source_label(files):
     return label
 
 
-def merge_plate(existing, label):
-    """(new plate comment, what happened) for a function whose plate comment is `existing` (None or text): our line
+def merge_plate(existing, label, prefix=None):
+    """(new plate comment, what happened) for a plate comment `existing` (None or text): our line (`prefix + label`)
     is added after any comment already there, or replaces our earlier line; other lines are kept. The second value
     is "added", "updated" or "unchanged"."""
-    ours = COMMENT_PREFIX + label
+    if prefix is None:
+        prefix = COMMENT_PREFIX
+    ours = prefix + label
     if not existing:
         return ours, "added"
     lines = existing.split("\n")
-    kept = [l for l in lines if not l.startswith(COMMENT_PREFIX)]
+    kept = [l for l in lines if not l.startswith(prefix)]
     if len(kept) == len(lines):
         return existing + "\n" + ours, "added"
-    first = next(i for i, l in enumerate(lines) if l.startswith(COMMENT_PREFIX))
+    first = next(i for i, l in enumerate(lines) if l.startswith(prefix))
     merged = []
     for i, l in enumerate(lines):
-        if l.startswith(COMMENT_PREFIX):
+        if l.startswith(prefix):
             if i == first:
                 merged.append(ours)
         else:
@@ -254,9 +322,11 @@ def bump(summary, key, n=1):
     summary[key] = summary.get(key, 0) + n
 
 
-def stage_functions(program, rows, sources, summary, write=True):
+def stage_functions(program, data, summary, write=True):
     """Create or rename each function at its address, set its extent and add its plate comment. `program` is a
     GhidraProgram, or anything with the same methods."""
+    rows = data["rows"]
+    sources = data["sources"]
     for address, size, table_name in rows:
         program.check_cancelled()
         name = sanitize_name(table_name)
@@ -282,6 +352,64 @@ def stage_functions(program, rows, sources, summary, write=True):
         except Exception:       # a row Ghidra's API rejects in some unforeseen way: count it, keep the rest
             bump(summary, "errors")
             program.check_cancelled()       # a cancel (Ghidra's own exception) must still stop the run
+
+
+def name_vftable(program, address, name, summary, write):
+    current = program.label_at(address)
+    if current == name or current == address_suffixed(name, address):
+        bump(summary, "vftables_unchanged")
+        return True
+    if not write:
+        bump(summary, "vftables_named")
+        return True
+    try:
+        try:
+            program.set_label(address, name)
+            bump(summary, "vftables_named")
+        except DuplicateName:
+            program.set_label(address, address_suffixed(name, address))
+            bump(summary, "vftables_named_with_address_suffix")
+        return True
+    except AdapterError:
+        bump(summary, "vftables_refused")
+        return False
+
+
+def comment_vftable(program, address, detail, summary, write):
+    text, outcome = merge_plate(program.plate_at(address), detail, VFTABLE_COMMENT_PREFIX)
+    if outcome != "unchanged" and write:
+        program.set_plate(address, text)
+    bump(summary, "vftable_comments_" + outcome)
+
+
+def stage_vftables(program, data, summary, write=True):
+    """Label each active virtual table from config/classes.tsv and add its RTTI summary as a plate comment."""
+    vftables = data.get("vftables")
+    if vftables is None:
+        return
+    summary["vftable_rows"] = len(vftables)
+    for address, offset, slots, class_name, bases in vftables:
+        program.check_cancelled()
+        if slots <= 0:
+            bump(summary, "vftables_unused")
+            continue
+        name = vftable_name(class_name, offset)
+        if not name:
+            bump(summary, "vftables_bad_rows")
+            continue
+        byte_size = slots * 4
+        if extent_end(address, byte_size) > IMAGE_LIMIT or not program.in_image(address) or \
+                not program.in_image(extent_end(address, byte_size)):
+            bump(summary, "vftables_outside_image")
+            continue
+        try:
+            name_vftable(program, address, name, summary, write)
+            comment_vftable(program, address, vftable_comment(class_name, offset, slots, bases), summary, write)
+        except ToolError:
+            raise
+        except Exception:
+            bump(summary, "errors")
+            program.check_cancelled()
 
 
 def create_function(program, address, size, name, summary, write):
@@ -352,20 +480,23 @@ def label_function(program, address, files, summary, write):
 
 STAGES = (
     ("functions", stage_functions),
-    # Types and global variables are not part of version 1: a stage added here receives the same arguments and
-    # reads its own table from config/ (see the README in this folder).
+    ("vftables", stage_vftables),
+    # Struct layouts and global variables are not applied yet: add a stage here and load its table in run()
+    # (see the README in this folder).
 )
 
 
 def run(program, config_dir, src_dir, write=True):
-    """Check the program, then apply every stage. Returns the summary: counter name -> count."""
+    """Check the program, load and validate every table, then apply every stage. Returns counter name -> count."""
     check_program_hash(program.sha256())
     rows, corrections = load_function_table(config_dir)
+    vftables = load_vftable_table(config_dir)
     sources = scan_sources(src_dir)
+    data = {"rows": rows, "sources": sources, "vftables": vftables}
     summary = {"table_rows": len(rows), "corrections_applied": corrections,
                "overlapping_extents": overlap_count(rows)}
     for _, stage in STAGES:
-        stage(program, rows, sources, summary, write)
+        stage(program, data, summary, write)
     return summary
 
 
@@ -374,7 +505,8 @@ def summary_lines(summary, write):
     for key in COUNTERS:
         if summary.get(key):
             lines.append("  %s: %d" % (key, summary[key]))
-    if write and any(summary.get(k) for k in ("create_refused", "rename_refused", "extents_refused", "errors")):
+    if write and any(summary.get(k) for k in ("create_refused", "rename_refused", "extents_refused",
+                                              "vftables_refused", "errors")):
         lines.append("  Some changes were refused. A program that Ghidra has already analysed can hold data or code "
                      "where a function belongs; a fresh import run before analysis takes all of them.")
     return lines
@@ -389,14 +521,16 @@ class GhidraProgram(object):
 
     def __init__(self, program, monitor):
         from ghidra.program.model.address import AddressSet
-        from ghidra.program.model.symbol import SourceType
+        from ghidra.program.model.symbol import SourceType, SymbolType
         from ghidra.util.exception import DuplicateNameException
         self.program = program
         self.monitor = monitor
         self.AddressSet = AddressSet
         self.USER = SourceType.USER_DEFINED
+        self.LABEL = SymbolType.LABEL
         self.DuplicateNameException = DuplicateNameException
         self.functions = program.getFunctionManager()
+        self.symbols = program.getSymbolTable()
         self.listing = program.getListing()
         self.memory = program.getMemory()
         self.space = program.getAddressFactory().getDefaultAddressSpace()
@@ -477,6 +611,26 @@ class GhidraProgram(object):
 
     def set_plate(self, address, text):
         self.listing.setComment(self.addr(address), self.plate, text)
+
+    def label_at(self, address):
+        sym = self.symbols.getPrimarySymbol(self.addr(address))
+        if sym is None or sym.isDynamic() or not sym.isGlobal() or sym.getSymbolType() != self.LABEL:
+            return None
+        return sym.getName()
+
+    def set_label(self, address, name):
+        addr = self.addr(address)
+        sym = self.symbols.getPrimarySymbol(addr)
+        try:
+            if sym is not None and not sym.isDynamic() and sym.isGlobal() and sym.getSymbolType() == self.LABEL:
+                sym.setName(name, self.USER)
+            else:
+                created = self.symbols.createLabel(addr, name, self.USER)
+                created.setPrimary()
+        except self.DuplicateNameException as e:
+            raise DuplicateName(str(e))
+        except Exception as e:
+            raise AdapterError(str(e))
 
 
 def clone_candidates(arguments, source_dir, environ):

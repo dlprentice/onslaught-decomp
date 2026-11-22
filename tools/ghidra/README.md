@@ -1,19 +1,21 @@
 # Names for your own Ghidra database
 
-Status: active reference (version 1)
-Last updated: 2026-11-06
-Summary: a Ghidra script that gives the functions of this tree's function table, in your own copy of the retail
-executable, the name, extent and source file this tree records, how to run it in the GUI and headless, and what it
-does not do.
+Status: active reference (version 2)
+Last updated: 2026-11-21
+Summary: a Ghidra script that gives the functions and virtual tables of this tree's tables, in your own copy of the
+retail executable, the name, extent and plate comment this tree records, how to run it in the GUI and headless, and
+what it does not do.
 
 If you own *Battle Engine Aquila*, you can import its `BEA.exe` into Ghidra, run one script from this clone, and have
 the functions in this tree's function table named as the decompilation names them, sized as the table sizes them, and
-commented with the file of `src/` that defines it. A headless run takes seconds. The Ghidra GUI steps below have not
+commented with the file of `src/` that defines them, plus every active virtual table from `config/classes.tsv` labelled
+and commented with its slot count and base hierarchy. A headless run takes seconds. The Ghidra GUI steps below have not
 been run.
 
 This repository publishes no Ghidra database, no game bytes and no decompiler output. The script reads only this
 tree's own tables: `config/functions.tsv` and `config/function-corrections.tsv` (applied the way `tools/decomp.py`
-reads them) for the names and extents, and the `// FUNCTION: 0xADDRESS` annotations in `src/` for the file names.
+reads them) for the function names and extents, `config/classes.tsv` (when present) for the virtual tables, and the
+`// FUNCTION: 0xADDRESS` annotations in `src/` for the file names.
 
 ## What you need
 
@@ -83,6 +85,14 @@ For each function in the table, in address order:
   function (a few files, implementation files first, when several annotate the same address). It keeps a comment
   you wrote and replaces only its own line.
 
+When `config/classes.tsv` is present beside `config/functions.tsv`, a second stage runs for each active virtual table
+(`slots > 0`) in address order:
+
+- **primary label**: labels the table `Class__vftable` (or `Class__vftable_0xOFFSET` when `subobjectOffset` is non-zero).
+  The five unused zero-slot rows are skipped and counted as `vftables_unused`.
+- **plate comment**: adds one line, `Onslaught decomp vftable: Class (+0xOFFSET, N slots; bases: ...)`, preserving any
+  existing comment lines.
+
 Running it twice is safe: it makes no change the second time, and the summary shows only "unchanged" counts.
 
 **Names are not unique.** The table repeats some names (most repeated rows are the initializers of a few constants that
@@ -106,6 +116,9 @@ Counts only, printed to the Console or the headless log:
 | `renamed`, `names_unchanged`, `rename_refused` | functions renamed, already right, or refused |
 | `extents_set`, `extents_unchanged`, `extents_refused` | extents replaced, already right, or refused (another function holds part of the range) |
 | `comments_added`, `comments_updated`, `comments_unchanged`, `no_source_file` | plate comments, and functions that no `// FUNCTION:` annotation in `src/` covers (mostly compiler-generated unwind funclets and import thunks; they keep their name and extent, with no comment) |
+| `vftable_rows`, `vftables_unused`, `vftables_outside_image`, `vftables_bad_rows` | rows read from `config/classes.tsv`, zero-slot unused rows skipped, and rows outside the image or without a class name |
+| `vftables_named`, `vftables_named_with_address_suffix`, `vftables_unchanged`, `vftables_refused` | virtual tables labelled, suffixed on collision, already right, or refused |
+| `vftable_comments_added`, `vftable_comments_updated`, `vftable_comments_unchanged` | virtual-table plate comments added, updated, or already right |
 | `disassembled`, `errors` | entries disassembled before creating a function; rows whose changes raised an unexpected error (the rest of that row is skipped) |
 
 Under PyGhidra, a refused change or an unexpected error in one row does not stop the run, and the changes already made stay. A table
@@ -113,9 +126,10 @@ that is damaged (a malformed row, or no rows at all) stops it before any change.
 
 ## What it does not include
 
-- **Types and global variables.** Version 1 applies function names, extents and source-file comments only. The script
-  keeps its stages in one list (`STAGES`) so that a stage for types or globals, reading its own table from `config/`,
-  can be added beside the functions stage without touching the rest.
+- **Struct layouts and global variables.** Version 2 applies function names, extents, source-file comments and
+  virtual-table labels/comments (`config/classes.tsv`). The script keeps its stages in one list (`STAGES`) so that a
+  stage for struct types or global variables, reading its own table from `config/`, can be added beside the existing
+  stages without touching the rest.
 - **Functions the table does not list.** The table covers the game's own code; it does not list the library code
   linked after it. If you run Ghidra's analysis, the functions it finds there, and any others it adds, keep Ghidra's
   own names.

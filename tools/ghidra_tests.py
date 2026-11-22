@@ -53,6 +53,14 @@ CORRECTIONS = (
     "0x004010b0\t12\tAdded__function\tsynthetic evidence\n"
 )
 NO_CORRECTIONS = "address\tbytes\tname\tevidence\n"
+CLASSES = (
+    "class\tsubobjectOffset\tvftable\tslots\tbases\n"
+    "Alpha\t0x0\t0x00401800\t4\t\n"
+    "Beta\t0x0\t0x00401820\t6\tAlpha@0x0\n"
+    "Beta\t0x4\t0x00401840\t2\tAlpha@0x0;Mixin@0x4\n"
+    "Unused\t0x0\t0x00401860\t0\t\n"
+    "Outside\t0x0\t0x00402000\t3\t\n"
+)
 SOURCES = {
     "Alpha.cpp": "// FUNCTION: 0x00401000\nvoid Alpha::Run() {}\n",
     "Beta.cpp": "void Beta::Beta() // FUNCTION: 0x00401010\n",
@@ -65,14 +73,17 @@ SOURCES = {
 class FakeProgram(object):
     """Stands in for GhidraProgram; records every write."""
 
-    def __init__(self, sha=GOOD, image=(0x400000, 0x401fff), duplicates_refused=False, refuse_extent_at=()):
+    def __init__(self, sha=GOOD, image=(0x400000, 0x401fff), duplicates_refused=False, refuse_extent_at=(),
+                 refuse_label_at=()):
         self.sha = sha
         self.image = image
         self.functions = {}      # entry -> [name, size]
+        self.labels = {}         # address -> name
         self.plates = {}
         self.writes = 0
         self.duplicates_refused = duplicates_refused
         self.refuse_extent_at = set(refuse_extent_at)
+        self.refuse_label_at = set(refuse_label_at)
 
     def sha256(self):
         return self.sha
@@ -124,12 +135,25 @@ class FakeProgram(object):
         self.writes += 1
         self.plates[address] = text
 
+    def label_at(self, address):
+        return self.labels.get(address)
 
-def make_clone(root, table=TABLE, corrections=CORRECTIONS, sources=SOURCES):
+    def set_label(self, address, name):
+        if address in self.refuse_label_at:
+            raise M.AdapterError("refused")
+        if self.duplicates_refused and any(a != address and n == name for a, n in self.labels.items()):
+            raise M.DuplicateName(name)
+        self.writes += 1
+        self.labels[address] = name
+
+
+def make_clone(root, table=TABLE, corrections=CORRECTIONS, sources=SOURCES, classes=None):
     root = Path(root)
     (root / "config").mkdir(parents=True, exist_ok=True)
     (root / "config" / "functions.tsv").write_text(table)
     (root / "config" / "function-corrections.tsv").write_text(corrections)
+    if classes is not None:
+        (root / "config" / "classes.tsv").write_text(classes)
     for name, text in sources.items():
         path = root / "src" / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -451,6 +475,51 @@ class StubManager(object):
         return self.by_entry[entry.offset]
 
 
+class StubSymbol(object):
+    def __init__(self, table, address, name, dynamic=False, is_global=True, kind="label"):
+        self.table, self.address, self.name = table, address, name
+        self._dynamic, self._global, self._kind = dynamic, is_global, kind
+
+    def isDynamic(self):
+        return self._dynamic
+
+    def isGlobal(self):
+        return self._global
+
+    def getSymbolType(self):
+        return self._kind
+
+    def getName(self):
+        return self.name
+
+    def setName(self, name, source):
+        if any(s is not self and s.name == name for s in self.table.by_addr.values()):
+            raise self.table.Dup("duplicate")
+        self.name = name
+
+    def setPrimary(self):
+        self.table.by_addr[self.address] = self
+
+
+class StubSymbolTable(object):
+    def __init__(self, dup):
+        self.by_addr = {}
+        self.Dup = dup
+        self.refuse_label = False
+
+    def getPrimarySymbol(self, address):
+        return self.by_addr.get(address.offset)
+
+    def createLabel(self, address, name, source):
+        if self.refuse_label:
+            raise RuntimeError("refused")
+        if any(s.name == name for s in self.by_addr.values()):
+            raise self.Dup("duplicate")
+        sym = StubSymbol(self, address.offset, name)
+        self.by_addr[address.offset] = sym
+        return sym
+
+
 class StubDisassemble(object):
     """Stands in for DisassembleCommand: records the entry it was asked to disassemble."""
     calls = []
@@ -476,7 +545,9 @@ def install_stub_ghidra():
     module("ghidra.program")
     module("ghidra.program.model")
     module("ghidra.program.model.address", AddressSet=AddrSet)
-    module("ghidra.program.model.symbol", SourceType=types.SimpleNamespace(USER_DEFINED="user"))
+    module("ghidra.program.model.symbol",
+           SourceType=types.SimpleNamespace(USER_DEFINED="user"),
+           SymbolType=types.SimpleNamespace(LABEL="label"))
     module("ghidra.program.model.listing", CommentType=types.SimpleNamespace(PLATE="plate"))
     module("ghidra.util")
     module("ghidra.util.exception", DuplicateNameException=Dup)
@@ -497,6 +568,7 @@ class LanguageId(object):
 class StubProgram(object):
     def __init__(self, base=0x400000, low=0x401000, high=0x401fff, language="x86:LE:32:default", code=True):
         self.manager = StubManager(Dup)
+        self.symbols = StubSymbolTable(Dup)
         self.comments = {}
         self.base, self.low, self.high = base, low, high
         self.language = language
@@ -509,6 +581,9 @@ class StubProgram(object):
 
     def getFunctionManager(self):
         return self.manager
+
+    def getSymbolTable(self):
+        return self.symbols
 
     def getListing(self):
         outer = self
@@ -908,6 +983,107 @@ class RunInGhidraTests(unittest.TestCase):
         adapter = load().GhidraProgram(program, types.SimpleNamespace(checkCancelled=lambda: None))
         self.assertFalse(adapter.in_image(0x100000000))
         self.assertTrue(adapter.in_image(0x401000))
+
+
+class VftableTests(unittest.TestCase):
+    def test_parse_vftables_sorts_and_validates(self):
+        rows = M.parse_vftables(CLASSES, "classes.tsv")
+        self.assertEqual(len(rows), 5)
+        self.assertEqual(rows[0], (0x401800, 0, 4, "Alpha", ""))
+        self.assertEqual(rows[2], (0x401840, 4, 2, "Beta", "Alpha@0x0;Mixin@0x4"))
+        self.assertEqual([r[0] for r in rows], sorted(r[0] for r in rows))
+
+    def test_malformed_classes_table_stops_before_any_write(self):
+        bad_tables = (
+            "",
+            "class\tvftable\tslots\n",
+            "class\tsubobjectOffset\tvftable\tslots\tbases\n",
+            "class\tsubobjectOffset\tvftable\tslots\tbases\nSecretClass\t0x0\tbad\t4\t\n",
+            "class\tsubobjectOffset\tvftable\tslots\tbases\nA\t0x0\t0x00401800\t4\t\nB\t0x0\t0x00401800\t2\t\n",
+        )
+        for text in bad_tables:
+            with tempfile.TemporaryDirectory() as d:
+                root = make_clone(d, classes=text)
+                program = FakeProgram()
+                with self.assertRaises(M.ToolError) as caught:
+                    run_clone(program, root)
+                self.assertNotIn("SecretClass", str(caught.exception))
+                self.assertEqual(program.writes, 0)
+                self.assertEqual(program.functions, {})
+                self.assertEqual(program.labels, {})
+
+    def test_vftable_stage_names_comments_and_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = make_clone(d, classes=CLASSES)
+            program = FakeProgram()
+            first = run_clone(program, root)
+            self.assertEqual(first["vftable_rows"], 5)
+            self.assertEqual(first["vftables_unused"], 1)
+            self.assertEqual(first["vftables_outside_image"], 1)
+            self.assertEqual(first["vftables_named"], 3)
+            self.assertEqual(first["vftable_comments_added"], 3)
+            self.assertEqual(program.labels[0x401800], "Alpha__vftable")
+            self.assertEqual(program.labels[0x401820], "Beta__vftable")
+            self.assertEqual(program.labels[0x401840], "Beta__vftable_0x4")
+            self.assertNotIn(0x401860, program.labels)
+            self.assertNotIn(0x402000, program.labels)
+            self.assertEqual(program.plates[0x401800], M.VFTABLE_COMMENT_PREFIX + "Alpha (+0x0, 4 slots)")
+            self.assertEqual(program.plates[0x401840],
+                             M.VFTABLE_COMMENT_PREFIX + "Beta (+0x4, 2 slots); bases: Alpha@0x0, Mixin@0x4")
+            writes_after = program.writes
+            second = run_clone(program, root)
+            self.assertEqual(program.writes, writes_after)
+            self.assertEqual(second.get("vftables_named", 0), 0)
+            self.assertEqual(second["vftables_unchanged"], 3)
+            self.assertEqual(second["vftable_comments_unchanged"], 3)
+
+    def test_vftable_stage_check_mode_duplicate_suffix_and_refusal(self):
+        dup_classes = (
+            "class\tsubobjectOffset\tvftable\tslots\tbases\n"
+            "Dup\t0x0\t0x00401800\t2\t\n"
+            "Dup\t0x0\t0x00401810\t2\t\n"
+            "Refused\t0x0\t0x00401820\t2\t\n"
+        )
+        with tempfile.TemporaryDirectory() as d:
+            root = make_clone(d, classes=dup_classes)
+            chk_prog = FakeProgram()
+            chk = run_clone(chk_prog, root, write=False)
+            self.assertEqual(chk_prog.writes, 0)
+            self.assertEqual(chk["vftables_named"], 3)
+            self.assertEqual(chk["vftable_comments_added"], 3)
+            program = FakeProgram(duplicates_refused=True, refuse_label_at=[0x401820])
+            res = run_clone(program, root)
+            self.assertEqual(program.labels[0x401800], "Dup__vftable")
+            self.assertEqual(program.labels[0x401810], "Dup__vftable__00401810")
+            self.assertEqual(res["vftables_named"], 1)
+            self.assertEqual(res["vftables_named_with_address_suffix"], 1)
+            self.assertEqual(res["vftables_refused"], 1)
+            second = run_clone(program, root)
+            self.assertEqual(second["vftables_unchanged"], 2)
+
+    def test_vftables_through_ghidra_adapter(self):
+        names = install_stub_ghidra()
+        try:
+            mod = load()
+            with tempfile.TemporaryDirectory() as d:
+                root = make_clone(d, classes=CLASSES)
+                program = StubProgram()
+                # Existing dynamic and non-global labels are replaced by a primary global USER_DEFINED label
+                program.symbols.by_addr[0x401800] = StubSymbol(program.symbols, 0x401800, "auto_label_1", dynamic=True)
+                program.symbols.by_addr[0x401820] = StubSymbol(program.symbols, 0x401820, "vftable", is_global=False)
+                adapter = mod.GhidraProgram(program, types.SimpleNamespace(checkCancelled=lambda: None))
+                first = mod.run(adapter, str(root / "config"), str(root / "src"), True)
+                self.assertEqual(first["vftables_named"], 3)
+                self.assertEqual(program.symbols.by_addr[0x401800].getName(), "Alpha__vftable")
+                self.assertEqual(program.symbols.by_addr[0x401820].getName(), "Beta__vftable")
+                self.assertEqual(program.symbols.by_addr[0x401840].getName(), "Beta__vftable_0x4")
+                second = mod.run(adapter, str(root / "config"), str(root / "src"), True)
+                self.assertEqual(second.get("vftables_named", 0), 0)
+                self.assertEqual(second["vftables_unchanged"], 3)
+                self.assertEqual(second["vftable_comments_unchanged"], 3)
+        finally:
+            for name in names:
+                sys.modules.pop(name, None)
 
 
 class SyntaxTests(unittest.TestCase):

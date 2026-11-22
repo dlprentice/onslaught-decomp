@@ -1,9 +1,37 @@
 # Build output and the files the tools write from your own copy of the game stay out of the repository.
 /build/
-/local-data/
+local-data/
+local-lab/
+.worktrees/
+.claude/worktrees/
+.claude/settings.local.json
 /src/data/
 __pycache__/
 *.pyc
 # an optional local file of default input locations (README, Settings)
 /tools/site_paths.py
 settings.local.json
+
+# Environment files, credentials and secret keys
+.env
+.env.*
+*.env
+*.private.json
+*.key
+*.pem
+
+# Crash dumps, databases and analysis projects
+*.core
+*.dmp
+*.sqlite
+*.gpr
+*.rep/
+
+# Retail game executables, libraries, assets and saves
+*.exe
+*.dll
+*.bea
+*.bes
+*.aya
+*.bik
+*.sav
